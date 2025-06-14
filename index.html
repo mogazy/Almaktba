@@ -408,10 +408,10 @@
         // دالة لإرسال رسالة إلى بوت تليجرام (معدلة لـ Web App)
         async function sendTelegramMessage(messageText) {
             if (window.Telegram && window.Telegram.WebApp) {
-                // If running inside a Telegram Web App
+                // إذا كان يعمل داخل تطبيق تليجرام المصغر
                 try {
-                    // Send data back to the bot that launched this Web App
-                    // The bot will then need to process this data and send a message to the user.
+                    // إرسال البيانات إلى البوت الذي أطلق تطبيق الويب
+                    // سيحتاج البوت بعد ذلك إلى معالجة هذه البيانات وإرسال رسالة إلى المستخدم.
                     Telegram.WebApp.sendData(messageText);
                     showMessageBox('إرسال ناجح', `تم إرسال طلب "${messageText}" إلى بوت التليجرام. سيقوم البوت بمعالجته. (لا يمكنك رؤية الرسالة هنا مباشرة).`);
                 } catch (error) {
@@ -419,17 +419,14 @@
                     showMessageBox('خطأ في إرسال الطلب', 'حدث خطأ أثناء محاولة إرسال الطلب إلى بوت التليجرام عبر Web App.');
                 }
             } else {
-                // If not running inside a Telegram Web App (e.g., in a regular browser)
-                // We cannot directly send messages from client-side JS due to security.
-                // Inform the user about the need for a server-side bot or that this feature
-                // is designed for Telegram Web Apps.
-                showMessageBox('ميزة مخصصة لتليجرام', 'هذه الميزة مصممة لتطبيق تليجرام المصغر. لتفعيلها، يجب فتح التطبيق عبر بوت تليجرام. لن يتم إرسال الرسالة من هنا مباشرة.');
+                // إذا لم يكن يعمل داخل تطبيق تليجرام المصغر (على سبيل المثال، في متصفح عادي)
+                showMessageBox('ميزة مخصصة لتليجرام', 'هذه الميزة مصممة لتطبيق تليجرام المصغر. لتفعيلها، يجب فتح التطبيق عبر بوت تليجرام.');
             }
         }
 
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Telegram WebApp initialization
+            // تهيئة Telegram WebApp
             if (window.Telegram && window.Telegram.WebApp) {
                 Telegram.WebApp.ready();
                 Telegram.WebApp.expand();

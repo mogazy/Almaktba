@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الطلاب - جامعة النجف</title>
+    <!-- تضمين Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* الخط الرئيسي */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* حاوية صندوق الرسائل */
+        .message-box-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .message-box-container.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .message-box {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 80%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-box-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .message-box-content {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .message-box-button {
+            background: #4f46e5;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            align-self: center;
+        }
+
+        .message-box-button:hover {
+            background: #6d5ce7;
+        }
+
+        /* زر الترجمة بحالة التحميل */
+        .translate-btn.loading {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="font-inter bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-gray-800 overflow-x-hidden">
+    <div class="app-container max-w-md mx-auto bg-white bg-opacity-95 backdrop-blur-xl min-h-screen relative shadow-2xl rounded-lg overflow-hidden md:min-h-0 md:my-8 md:rounded-xl">
+        <!-- الرأس -->
+        <header class="header flex justify-between items-center p-5 bg-gradient-to-tr from-indigo-600 to-purple-700 text-white relative overflow-hidden">
+            <!-- أيقونة البحث -->
+            <svg class="header-icon w-7 h-7 cursor-pointer transition-all duration-200 hover:scale-105 relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            
+            <!-- الشعار والعنوان -->
+            <div class="logo-container text-center relative z-10">
+                <div class="logo w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-300 rounded-full flex items-center justify-center text-2xl font-bold text-indigo-700 mx-auto mb-1 shadow-lg">ج</div>
+                <div class="app-title text-sm font-semibold opacity-90">جامعة النجف</div>
+            </div>
+            
+            <!-- أيقونات الملف الشخصي والإشعارات -->
+            <div class="flex gap-3 items-center">
+                <!-- أيقونة الإشعارات -->
+                <svg class="header-icon w-7 h-7 cursor-pointer transition-all duration-200 hover:scale-105 relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                </svg>
+                <!-- صورة الملف الشخصي -->
+                <div class="profile-pic w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white font-bold cursor-pointer transition-all duration-200 hover:scale-105 relative z-10">أ</div>
+            </div>
+        </header>
+
+        <!-- المحتوى الرئيسي -->
+        <main class="main-content p-6 pb-24">
+            <!-- قسم المحاضرات الأخيرة -->
+            <div class="recent-lectures-section mb-6">
+                <h2 class="section-title text-xl font-bold text-gray-800 mb-5 text-right">آخر المحاضرات</h2>
+                <div class="lectures-list bg-white rounded-2xl p-5 shadow-lg">
+                    <!-- عنصر المحاضرة -->
+                    <div class="lecture-item flex justify-between items-center py-4 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
+                        <div class="lecture-info flex-1 text-right">
+                            <div class="lecture-name text-base font-semibold text-gray-800 mb-1">محاضرة الرياضيات المتقدمة</div>
+                            <div class="lecture-details text-sm text-gray-600">د. أحمد الحسيني • أمس 2:30 م</div>
+                        </div>
+                        <div class="lecture-status available px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-br from-emerald-500 to-green-600 text-white">متاح</div>
+                    </div>
+                    <div class="lecture-item flex justify-between items-center py-4 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
+                        <div class="lecture-info flex-1 text-right">
+                            <div class="lecture-name text-base font-semibold text-gray-800 mb-1">أساسيات البرمجة</div>
+                            <div class="lecture-details text-sm text-gray-600">د. سارة العلي • أمس 10:00 ص</div>
+                        </div>
+                        <div class="lecture-status available px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-br from-emerald-500 to-green-600 text-white">متاح</div>
+                    </div>
+                    <div class="lecture-item flex justify-between items-center py-4 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
+                        <div class="lecture-info flex-1 text-right">
+                            <div class="lecture-name text-base font-semibold text-gray-800 mb-1">الفيزياء النظرية</div>
+                            <div class="lecture-details text-sm text-gray-600">د. محمد الكاظم • الأحد 4:00 م</div>
+                        </div>
+                        <div class="lecture-status available px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-br from-emerald-500 to-green-600 text-white">متاح</div>
+                    </div>
+                    <div class="lecture-item flex justify-between items-center py-4 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
+                        <div class="lecture-info flex-1 text-right">
+                            <div class="lecture-name text-base font-semibold text-gray-800 mb-1">التاريخ الإسلامي</div>
+                            <div class="lecture-details text-sm text-gray-600">د. فاطمة الزهراء • الأحد 11:30 ص</div>
+                        </div>
+                        <div class="lecture-status available px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-br from-emerald-500 to-green-600 text-white">متاح</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- شبكة بطاقات الميزات -->
+            <div class="cards-grid grid grid-cols-2 gap-4 mb-6">
+                <!-- بطاقة الميزة -->
+                <div class="feature-card">
+                    <div class="card-icon">📚</div>
+                    <div class="card-title">أحدث المحاضرات</div>
+                </div>
+                <div class="feature-card">
+                    <div class="card-icon">📅</div>
+                    <div class="card-title">جدول اليوم</div>
+                </div>
+                <div class="feature-card">
+                    <div class="card-icon">📝</div>
+                    <div class="card-title">الواجبات</div>
+                </div>
+                <div class="feature-card">
+                    <div class="card-icon">🏆</div>
+                    <div class="card-title">الدرجات</div>
+                </div>
+            </div>
+
+            <!-- بطاقة الترجمة -->
+            <div class="translation-card bg-gradient-to-br from-cyan-500 to-blue-700 text-white p-5 rounded-2xl mb-5 relative overflow-hidden">
+                <h3 class="mb-4 text-base font-semibold">الترجمة السريعة</h3>
+                <input type="text" class="translation-input w-full p-3 border-none rounded-xl mb-4 text-sm bg-white bg-opacity-90 backdrop-blur-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300" placeholder="اكتب النص للترجمة...">
+                <button class="translate-btn bg-white bg-opacity-20 border-2 border-white border-opacity-30 text-white px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 backdrop-blur-md hover:bg-opacity-30">ترجم الآن</button>
+            </div>
+        </main>
+
+        <!-- التنقل السفلي -->
+        <nav class="bottom-nav fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white bg-opacity-95 backdrop-blur-xl p-4 border-t border-gray-200 rounded-t-3xl shadow-xl">
+            <div class="nav-items flex justify-around items-center">
+                <!-- عنصر التنقل -->
+                <div class="nav-item active flex flex-col items-center cursor-pointer transition-all duration-200 p-2 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700 text-white -translate-y-1 shadow-lg">
+                    <svg class="nav-icon w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                    <span class="nav-label text-xs font-medium">الرئيسية</span>
+                </div>
+                <div class="nav-item flex flex-col items-center cursor-pointer transition-all duration-200 p-2 rounded-xl hover:bg-indigo-100 hover:translate-y-[-1px]">
+                    <svg class="nav-icon w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+                    </svg>
+                    <span class="nav-label text-xs font-medium">المحاضرات</span>
+                </div>
+                <div class="nav-item flex flex-col items-center cursor-pointer transition-all duration-200 p-2 rounded-xl hover:bg-indigo-100 hover:translate-y-[-1px]">
+                    <svg class="nav-icon w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                    </svg>
+                    <span class="nav-label text-xs font-medium">الجدول</span>
+                </div>
+                <div class="nav-item flex flex-col items-center cursor-pointer transition-all duration-200 p-2 rounded-xl hover:bg-indigo-100 hover:translate-y-[-1px]">
+                    <svg class="nav-icon w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.01-4.65.47-6.8l-.46-.75c-.11-.19-.26-.37-.42-.53L12 16.47l.87-1.4zM21.5 11.5c0-5.25-4.25-9.5-9.5-9.5S2.5 6.25 2.5 11.5 6.75 21 12 21s9.5-4.25 9.5-9.5zM12 20c-4.69 0-8.5-3.81-8.5-8.5S7.31 3 12 3s8.5 3.81 8.5 8.5S16.69 20 12 20z"/>
+                    </svg>
+                    <span class="nav-label text-xs font-medium">الترجمة</span>
+                </div>
+                <div class="nav-item flex flex-col items-center cursor-pointer transition-all duration-200 p-2 rounded-xl hover:bg-indigo-100 hover:translate-y-[-1px]">
+                    <svg class="nav-icon w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                    <span class="nav-label text-xs font-medium">المزيد</span>
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- حاوية صندوق الرسائل (خارج حاوية التطبيق) -->
+    <div class="message-box-container" id="messageBoxContainer">
+        <div class="message-box">
+            <div class="message-box-title" id="messageBoxTitle"></div>
+            <div class="message-box-content" id="messageBoxContent"></div>
+            <button class="message-box-button" id="messageBoxButton">موافق</button>
+        </div>
+    </div>
+
+    <script>
+        // وظيفة لعرض صندوق رسائل مخصص
+        function showMessageBox(title, message) {
+            const container = document.getElementById('messageBoxContainer');
+            document.getElementById('messageBoxTitle').textContent = title;
+            document.getElementById('messageBoxContent').textContent = message;
+            container.classList.add('show');
+
+            document.getElementById('messageBoxButton').onclick = () => {
+                container.classList.remove('show');
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // إضافة وظيفة للأزرار وعناصر التنقل
+            const navItems = document.querySelectorAll('.nav-item');
+            const featureCards = document.querySelectorAll('.feature-card');
+            const translateBtn = document.querySelector('.translate-btn');
+            const translationInput = document.querySelector('.translation-input');
+            const lectureItems = document.querySelectorAll('.lecture-item');
+            const headerIcons = document.querySelectorAll('.header-icon, .profile-pic');
+
+            // تأثير النقر على عناصر التنقل
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active', 'bg-gradient-to-br', 'from-indigo-600', 'to-purple-700', 'text-white', '-translate-y-1', 'shadow-lg');
+                        nav.classList.add('hover:bg-indigo-100', 'hover:translate-y-[-1px]');
+                    });
+                    this.classList.add('active', 'bg-gradient-to-br', 'from-indigo-600', 'to-purple-700', 'text-white', '-translate-y-1', 'shadow-lg');
+                    this.classList.remove('hover:bg-indigo-100', 'hover:translate-y-[-1px]');
+
+                    // عرض رسالة حسب عنصر التنقل النشط
+                    const navLabel = this.querySelector('.nav-label').textContent;
+                    showMessageBox('الانتقال إلى', navLabel);
+                });
+            });
+
+            // تأثير النقر على بطاقات الميزات
+            featureCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                    const cardTitle = this.querySelector('.card-title').textContent;
+                    showMessageBox('الوصول إلى الميزة', cardTitle);
+                });
+            });
+
+            // وظيفة الترجمة
+            translateBtn.addEventListener('click', async function() {
+                const text = translationInput.value.trim();
+                if (!text) {
+                    showMessageBox('خطأ', 'الرجاء إدخال نص للترجمة.');
+                    return;
+                }
+
+                this.textContent = 'جاري الترجمة...';
+                this.classList.add('loading'); // Add loading class for styling
+                this.disabled = true; // Disable button during translation
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: `Translate the following Arabic text to English: "${text}"` }] });
+                    
+                    const payload = { contents: chatHistory };
+                    const apiKey = ""; // Canvas will provide this
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    let translatedText = "خطأ في الترجمة";
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        translatedText = result.candidates[0].content.parts[0].text;
+                    } else {
+                        translatedText = "لم يتم العثور على ترجمة.";
+                    }
+                    
+                    showMessageBox('تمت الترجمة', `تم: ${text} → ${translatedText}`);
+                } catch (error) {
+                    console.error("خطأ في الترجمة:", error);
+                    showMessageBox('خطأ في الترجمة', 'حدث خطأ أثناء الترجمة. الرجاء المحاولة مرة أخرى.');
+                } finally {
+                    this.textContent = 'ترجم الآن';
+                    this.classList.remove('loading'); // Remove loading class
+                    this.disabled = false; // Re-enable button
+                }
+            });
+
+            // تأثير النقر على عناصر المحاضرة
+            lectureItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const lectureName = this.querySelector('.lecture-name').textContent;
+                    showMessageBox('فتح محاضرة', `فتح محاضرة: ${lectureName}`);
+                });
+            });
+
+            // تأثير النقر على أيقونات الرأس
+            headerIcons.forEach(icon => {
+                icon.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 100);
+                    // يمكنك إضافة منطق مختلف لكل أيقونة إذا لزم الأمر
+                    const isProfile = this.classList.contains('profile-pic');
+                    const message = isProfile ? 'فتح الملف الشخصي' : 'فتح البحث/الإشعارات';
+                    showMessageBox('وظيفة الرأس', message);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

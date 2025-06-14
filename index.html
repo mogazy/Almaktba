@@ -82,6 +82,38 @@
             cursor: not-allowed;
             opacity: 0.7;
         }
+
+        /* تصميم منشور الإشعارات */
+        .notification-post {
+            background-color: #f9fafb; /* Light gray background */
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0; /* Light border */
+        }
+
+        .notification-post-title {
+            font-size: 16px;
+            font-weight: 700; /* Bold */
+            color: #333;
+            margin-bottom: 8px;
+            text-align: right;
+        }
+
+        .notification-post-description {
+            font-size: 14px;
+            color: #4a5568; /* Darker gray for text */
+            margin-bottom: 8px;
+            text-align: right;
+        }
+
+        .notification-post-date {
+            font-size: 12px;
+            color: #718096; /* Lighter gray for date */
+            text-align: left; /* Align date to left */
+            font-weight: 500;
+        }
     </style>
 </head>
 <body class="font-inter bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-gray-800 overflow-x: hidden;">
@@ -235,7 +267,7 @@
             openCustomModal(title, `<div class="message-box-content">${message}</div>`);
         }
 
-        // وظيفة لمعالجة شرح المفهوم باستخدام Gemini API (محاكاة فقط)
+        // وظيفة لمعالجة شرح المفهوم باستخدام Gemini API
         async function explainConcept() {
             const conceptInput = document.getElementById('conceptInput');
             const conceptText = conceptInput.value.trim();
@@ -253,30 +285,46 @@
             resultDisplay.textContent = 'جاري المعالجة...'; // عرض رسالة تحميل
 
             try {
-                // هذا الجزء هو للمحاكاة فقط في هذا الكود. API Key هنا فارغ.
-                const apiKey = ""; 
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: `اشرح المفهوم التالي بوضوح وإيجاز باللغة العربية: "${conceptText}"` }] });
+                
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // سيتم توفير مفتاح API بواسطة Canvas تلقائيًا
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-                // محاكاة استجابة Gemini API
-                setTimeout(() => {
-                    resultDisplay.textContent = 'هذه وظيفة لشرح المفاهيم. في تطبيق متكامل، سيتم استخدام نموذج ذكاء اصطناعي (مثل Gemini) هنا لشرح مفهوم "' + conceptText + '".';
-                    explainBtn.textContent = 'شرح المفهوم ✨';
-                    explainBtn.classList.remove('loading');
-                    explainBtn.disabled = false;
-                }, 1500);
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`خطأ في HTTP! الحالة: ${response.status}`);
+                }
+
+                const result = await response.json();
+                let explanation = "لم يتم العثور على شرح.";
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    explanation = result.candidates[0].content.parts[0].text;
+                }
+                resultDisplay.textContent = explanation;
 
             } catch (error) {
                 console.error("خطأ في شرح المفهوم:", error);
                 resultDisplay.textContent = 'حدث خطأ أثناء الشرح. الرجاء المحاولة مرة أخرى.';
+            } finally {
                 explainBtn.textContent = 'شرح المفهوم ✨';
-                explainBtn.classList.remove('loading');
+                explainBtn.classList.remove('loading'); // إزالة فئة التحميل
                 explainBtn.disabled = false;
             }
         }
 
-        // دالة جلب وعرض الإشعارات من Firebase Firestore
+        // دالة جلب وعرض الإشعارات من Firebase Firestore بتصميم المنشورات
         async function fetchNotificationsFromFirestore() {
-            let notificationsContent = '<p>جاري تحميل الإشعارات...</p>';
+            let notificationsHtml = '<div class="text-center text-gray-500 py-4">جاري تحميل الإشعارات...</div>';
             try {
                 // التأكد من تسجيل الدخول المجهول قبل جلب البيانات
                 if (!userId) {
@@ -285,28 +333,37 @@
                     console.log("تم تسجيل الدخول كمستخدم مجهول. معرف المستخدم:", userId);
                 }
                 
-                const notificationsCol = collection(db, 'notifications'); // جلب من مجموعة 'notifications' مباشرة في الجذر
-                // يمكنك استخدام 'timestamp' للفرز إذا كان موجوداً في مستندات الإشعارات
+                const notificationsCol = collection(db, 'notifications'); 
                 const q = query(notificationsCol, orderBy('timestamp', 'desc')); 
                 const notificationSnapshot = await getDocs(q);
                 const notificationsData = notificationSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
                 if (notificationsData.length === 0) {
-                    notificationsContent = '<p>لا توجد إشعارات حالياً.</p>';
+                    notificationsHtml = '<div class="text-center text-gray-500 py-4">لا توجد إشعارات حالياً.</div>';
                 } else {
-                    notificationsContent = '<ul class="list-disc pr-5">'; // قائمة غير مرتبة
+                    notificationsHtml = '<div class="notifications-container">'; // حاوية للمنشورات
                     notificationsData.forEach(notification => {
-                        // استخدام حقل 'message' للإشعار وحقل 'date' إن وجد
-                        notificationsContent += `<li class="mb-2 text-gray-700">${notification.message || 'لا يوجد نص للإشعار'} (${notification.date || 'لا يوجد تاريخ'})</li>`;
+                        const title = notification.title || 'إشعار جديد'; // استخدام حقل العنوان أو افتراضي
+                        // استخدم 'description' أولاً، ثم 'message' كبديل للوصف
+                        const description = notification.description || notification.message || 'لا يوجد نص وصفي للإشعار.';
+                        const date = notification.date || 'لا يوجد تاريخ';
+
+                        notificationsHtml += `
+                            <div class="notification-post">
+                                <div class="notification-post-title">${title}</div>
+                                <div class="notification-post-description">${description}</div>
+                                <div class="notification-post-date">${date}</div>
+                            </div>
+                        `;
                     });
-                    notificationsContent += '</ul>';
+                    notificationsHtml += '</div>';
                 }
 
             } catch (error) {
                 console.error("خطأ في جلب الإشعارات من Firebase:", error);
-                notificationsContent = `<p class="text-red-500">فشل تحميل الإشعارات: ${error.message}. <br>الرجاء التأكد من تفعيل المصادقة المجهولة (Anonymous) في Firebase والتأكد من قواعد أمان Firestore لمجموعة 'notifications'.</p>`;
+                notificationsHtml = `<div class="text-center text-red-500 py-4">فشل تحميل الإشعارات: ${error.message}. <br>الرجاء التأكد من تفعيل المصادقة المجهولة (Anonymous) في Firebase والتأكد من قواعد أمان Firestore لمجموعة 'notifications'.</div>`;
             }
-            openCustomModal('إشعارات', notificationsContent);
+            openCustomModal('إشعارات', notificationsHtml);
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -317,7 +374,7 @@
             const headerIcons = document.querySelectorAll('.header-icon, .profile-pic');
             const notificationBell = document.getElementById('notificationBell'); // أيقونة الجرس
 
-            // معالجة النقر على عناصر المحاضرة الثابتة (تمت إعادتها)
+            // معالجة النقر على عناصر المحاضرة الثابتة
             const lectureItems = document.querySelectorAll('.lecture-item');
             lectureItems.forEach(item => {
                 item.addEventListener('click', function() {

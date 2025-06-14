@@ -239,41 +239,12 @@
 
         <!-- المحتوى الرئيسي -->
         <main class="main-content p-6 pb-24">
-            <!-- قسم المحاضرات الأخيرة (الآن هو القسم الوحيد للمحاضرات) -->
+            <!-- قسم المحاضرات الأخيرة -->
             <div class="recent-lectures-section mb-6 rounded-2xl p-5 shadow-lg">
                 <h2 class="section-title text-xl font-bold text-gray-800 pb-4 mb-5 text-right border-b border-gray-200">آخر المحاضرات</h2>
-                <!-- المحاضرات الثابتة -->
-                <div class="lecture-item flex justify-between items-center py-4 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
-                    <div class="lecture-info flex-1 text-right">
-                        <div class="lecture-name text-base font-semibold text-gray-800 mb-1">محاضرة الرياضيات المتقدمة</div>
-                        <!-- تم إزالة تفاصيل التاريخ والوقت -->
-                        <div class="lecture-details text-sm text-gray-600">د. أحمد الحسيني</div>
-                    </div>
-                    <!-- تم إزالة div.lecture-status بالكامل -->
-                </div>
-                <div class="lecture-item flex justify-between items-center py-4 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
-                    <div class="lecture-info flex-1 text-right">
-                        <div class="lecture-name text-base font-semibold text-gray-800 mb-1">أساسيات البرمجة</div>
-                        <!-- تم إزالة تفاصيل التاريخ والوقت -->
-                        <div class="lecture-details text-sm text-gray-600">د. سارة العلي</div>
-                    </div>
-                    <!-- تم إزالة div.lecture-status بالكامل -->
-                </div>
-                <div class="lecture-item flex justify-between items-center py-4 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
-                    <div class="lecture-info flex-1 text-right">
-                        <div class="lecture-name text-base font-semibold text-gray-800 mb-1">الفيزياء النظرية</div>
-                        <!-- تم إزالة تفاصيل التاريخ والوقت -->
-                        <div class="lecture-details text-sm text-gray-600">د. محمد الكاظم</div>
-                    </div>
-                    <!-- تم إزالة div.lecture-status بالكامل -->
-                </div>
-                <div class="lecture-item flex justify-between items-center py-4 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
-                    <div class="lecture-info flex-1 text-right">
-                        <div class="lecture-name text-base font-semibold text-gray-800 mb-1">التاريخ الإسلامي</div>
-                        <!-- تم إزالة تفاصيل التاريخ والوقت -->
-                        <div class="lecture-details text-sm text-gray-600">د. فاطمة الزهراء</div>
-                    </div>
-                    <!-- تم إزالة div.lecture-status بالكامل -->
+                <div id="dynamicLecturesContainer">
+                    <!-- المحاضرات سيتم تحميلها هنا ديناميكياً من Firebase -->
+                    <div class="text-center text-gray-500 py-4" id="loadingLectures">جاري تحميل المحاضرات...</div>
                 </div>
             </div>
 
@@ -405,50 +376,102 @@
             showMessageBox('إشعارات', notificationsHtml); // عرض الإشعارات في صندوق الرسائل
         }
 
-        // دالة لإرسال رسالة إلى بوت تليجرام (معدلة لـ Web App)
-        async function sendTelegramMessage(messageText) {
-            if (window.Telegram && window.Telegram.WebApp) {
-                // إذا كان يعمل داخل تطبيق تليجرام المصغر
-                try {
-                    // إرسال البيانات إلى البوت الذي أطلق تطبيق الويب
-                    // سيحتاج البوت بعد ذلك إلى معالجة هذه البيانات وإرسال رسالة إلى المستخدم.
-                    Telegram.WebApp.sendData(messageText);
-                    showMessageBox('إرسال ناجح', `تم إرسال طلب "${messageText}" إلى بوت التليجرام. سيقوم البوت بمعالجته. (لا يمكنك رؤية الرسالة هنا مباشرة).`);
-                } catch (error) {
-                    console.error('Error sending data to Telegram Web App:', error);
-                    showMessageBox('خطأ في إرسال الطلب', 'حدث خطأ أثناء محاولة إرسال الطلب إلى بوت التليجرام عبر Web App.');
+        // دالة جلب وعرض المحاضرات من Firebase Firestore
+        async function fetchLecturesFromFirestore() {
+            const dynamicLecturesContainer = document.getElementById('dynamicLecturesContainer');
+            const loadingLectures = document.getElementById('loadingLectures'); // الحصول على عنصر رسالة التحميل
+
+            // مسح المحتوى الحالي (بما في ذلك رسالة التحميل القديمة إن وجدت)
+            dynamicLecturesContainer.innerHTML = '';
+            // إضافة رسالة التحميل الجديدة
+            dynamicLecturesContainer.appendChild(loadingLectures);
+
+            try {
+                // التأكد من تسجيل الدخول المجهول قبل جلب البيانات
+                if (!userId) {
+                    await signInAnonymously(auth); 
+                    userId = auth.currentUser.uid;
+                    console.log("تم تسجيل الدخول كمستخدم مجهول. معرف المستخدم:", userId);
                 }
-            } else {
-                // إذا لم يكن يعمل داخل تطبيق تليجرام المصغر (على سبيل المثال، في متصفح عادي)
-                showMessageBox('ميزة مخصصة لتليجرام', 'هذه الميزة مصممة لتطبيق تليجرام المصغر. لتفعيلها، يجب فتح التطبيق عبر بوت تليجرام.');
+                
+                // جلب البيانات من Cloud Firestore من مجموعة 'lectures' مباشرة
+                const lecturesCol = collection(db, 'lectures'); 
+                // نستخدم 'timestamp' للفرز الزمني. تأكد من وجود حقل timestamp في مستنداتك.
+                const q = query(lecturesCol, orderBy('timestamp', 'desc')); 
+                const lectureSnapshot = await getDocs(q);
+                const lecturesData = lectureSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                console.log("Lectures data fetched:", lecturesData); // طباعة البيانات التي تم جلبها
+
+                // إزالة رسالة التحميل
+                if (loadingLectures) {
+                    loadingLectures.remove();
+                }
+
+                if (lecturesData.length === 0) {
+                    dynamicLecturesContainer.innerHTML = '<div class="text-center text-gray-500 py-4">لا توجد محاضرات متاحة حالياً في قاعدة البيانات. <br>الرجاء التأكد من وجود مستندات في مجموعة "lectures" في Firestore، وأن حقل "timestamp" موجود للفرز.</div>';
+                    return;
+                }
+
+                lecturesData.forEach((lecture, index) => {
+                    const lectureItem = document.createElement('div');
+                    lectureItem.classList.add(
+                        'lecture-item', 'flex', 'justify-between', 'items-center', 'py-4',
+                        'cursor-pointer', 'transition-all', 'duration-200', 'hover:bg-indigo-50',
+                        'hover:mx-[-20px]', 'hover:px-5', 'hover:rounded-xl'
+                    );
+
+                    // إضافة خط فاصل ما لم يكن العنصر الأخير
+                    if (index < lecturesData.length - 1) {
+                        lectureItem.classList.add('border-b', 'border-gray-100');
+                    }
+
+                    // عرض اسم المحاضرة والمحاضر فقط
+                    lectureItem.innerHTML = `
+                        <div class="lecture-info flex-1 text-right">
+                            <div class="lecture-name text-base font-semibold text-gray-800 mb-1">${lecture.name || 'اسم المحاضرة غير متوفر'}</div>
+                            <div class="lecture-details text-sm text-gray-600">${lecture.lecturer || 'غير معروف'}</div>
+                        </div>
+                    `;
+
+                    // عند النقر، الانتقال إلى رابط المحاضرة في نفس النافذة
+                    lectureItem.addEventListener('click', function() {
+                        if (lecture.link) {
+                            window.location.href = lecture.link; // فتح الرابط في نفس النافذة/علامة التبويب
+                        } else {
+                            showMessageBox('رابط غير متوفر', `لا يوجد رابط للمحاضرة: ${lecture.name || 'غير معروف'}.`);
+                        }
+                    });
+
+                    dynamicLecturesContainer.appendChild(lectureItem);
+                });
+
+            } catch (error) {
+                console.error("خطأ في جلب المحاضرات من Firebase:", error);
+                dynamicLecturesContainer.innerHTML = `<div class="text-center text-red-500 py-4">فشل تحميل المحاضرات من Firebase. الرجاء التأكد من إعداد مشروع Firebase الخاص بك، وأن Cloud Firestore مفعّل، وأن قاعدة البيانات تحتوي على مجموعة 'lectures' في الجذر مباشرةً بقواعد أمان تسمح بالقراءة للجميع. تفاصيل الخطأ: ${error.message}. <br>تأكد أيضاً من وجود حقل "timestamp" من نوع Timestamp في مستنداتك للفرز.</div>`;
             }
         }
 
 
         document.addEventListener('DOMContentLoaded', function() {
-            // تهيئة Telegram WebApp
-            if (window.Telegram && window.Telegram.WebApp) {
-                Telegram.WebApp.ready();
-                Telegram.WebApp.expand();
-                console.log('Telegram WebApp is ready and expanded!');
-            }
-
             const featureCards = document.querySelectorAll('.feature-card');
             const translateBtn = document.querySelector('.translate-btn');
             const translationInput = document.querySelector('.translation-input');
             const translatedTextDisplay = document.getElementById('translatedTextDisplay'); 
-            const lectureItems = document.querySelectorAll('.lecture-item');
             const notificationBell = document.getElementById('notificationBell'); // أيقونة الجرس
-            const todayScheduleCard = document.getElementById('todayScheduleCard'); // بطاقة جدول اليوم
+
+            // استدعاء دالة جلب المحاضرات الديناميكية من Firebase عند تحميل الصفحة
+            fetchLecturesFromFirestore();
 
             // ربط حدث النقر لبطاقة "جدول اليوم"
+            const todayScheduleCard = document.getElementById('todayScheduleCard'); // تأكد من الحصول على العنصر
             if (todayScheduleCard) {
                 todayScheduleCard.addEventListener('click', function() {
                     this.style.transform = 'scale(0.95)';
                     setTimeout(() => {
                         this.style.transform = '';
                     }, 150);
-                    sendTelegramMessage('الجدول'); // إرسال "الجدول" إلى بوت التليجرام
+                    showMessageBox('الوصول إلى الميزة', 'تم الوصول إلى ميزة: جدول اليوم'); 
                 });
             }
 
@@ -592,19 +615,9 @@
                 }
             });
 
-            // تأثير النقر على عناصر المحاضرة
-            lectureItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    const lectureName = this.querySelector('.lecture-name').textContent;
-                    showMessageBox('فتح محاضرة', `فتح محاضرة: ${lectureName}`);
-                });
-            });
-
             // تأثير النقر على أيقونات الرأس (أيقونة الإشعارات)
             notificationBell.addEventListener('click', fetchNotificationsFromFirestore);
         });
     </script>
-    <!-- تضمين مكتبة Telegram Web Apps JavaScript -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </body>
 </html>

@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق مكتبتي</title>
-    <!-- تضمين Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- تضمين خط Amiri من Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <style>
         /* الخط الرئيسي */
@@ -220,16 +218,13 @@
 </head>
 <body class="font-inter bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-gray-800 overflow-x:hidden">
     <div class="app-container max-w-md mx-auto bg-white bg-opacity-95 backdrop-blur-xl min-h-screen relative shadow-2xl rounded-lg overflow-hidden md:min-h-0 md:my-8 md:rounded-xl">
-        <!-- الرأس -->
         <header class="header flex justify-between items-center p-5 bg-gradient-to-tr from-indigo-600 to-purple-700 text-white relative overflow-hidden">
-            <!-- الشعار والعنوان (تم نقله إلى البداية ليظهر في أقصى اليمين لـ rtl) -->
             <div class="logo-container text-center relative z-10">
                 <div class="logo">
                     <span class="logo-text">مكتبتي</span>
                 </div>
             </div>
             
-            <!-- أيقونة الإشعارات فقط (تم نقلها إلى أقصى اليسار) -->
             <div class="flex gap-3 items-center">
                 <svg id="notificationBell" class="header-icon w-7 h-7 cursor-pointer transition-all duration-200 hover:scale-105 relative z-10" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
@@ -237,20 +232,15 @@
             </div>
         </header>
 
-        <!-- المحتوى الرئيسي -->
         <main class="main-content p-6 pb-24">
-            <!-- قسم المحاضرات الأخيرة -->
             <div class="recent-lectures-section mb-6 rounded-2xl p-5 shadow-lg">
                 <h2 class="section-title text-xl font-bold text-gray-800 pb-4 mb-5 text-right border-b border-gray-200">آخر المحاضرات</h2>
                 <div id="dynamicLecturesContainer">
-                    <!-- المحاضرات سيتم تحميلها هنا ديناميكياً من Firebase -->
                     <div class="text-center text-gray-500 py-4" id="loadingLectures">جاري تحميل المحاضرات...</div>
                 </div>
             </div>
 
-            <!-- شبكة بطاقات الميزات -->
             <div class="cards-grid grid grid-cols-2 gap-4 mb-6">
-                <!-- بطاقة جدول اليوم مع إطار متدرج -->
                 <div class="feature-card cursor-pointer transition-all duration-200 relative overflow-hidden" id="todayScheduleCard">
                     <div class="gradient-wrapper indigo-gradient">
                         <div class="feature-card-content">
@@ -259,7 +249,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- بطاقة شرح المفاهيم مع إطار متدرج -->
                 <div class="feature-card concept-explainer cursor-pointer transition-all duration-200 relative overflow-hidden">
                     <div class="gradient-wrapper emerald-gradient">
                         <div class="feature-card-content">
@@ -270,7 +259,6 @@
                 </div>
             </div>
 
-            <!-- بطاقة الترجمة -->
             <div class="translation-card bg-gradient-to-br text-white p-5 rounded-2xl mb-5 relative overflow-hidden">
                 <h3 class="mb-4 text-base font-semibold">الترجمة السريعة</h3>
                 <input type="text" class="translation-input w-full p-3 border-none rounded-xl mb-4 text-sm bg-white bg-opacity-90 backdrop-blur-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300" placeholder="اكتب النص للترجمة...">
@@ -279,10 +267,8 @@
             </div>
         </main>
 
-        <!-- تم حذف التنقل السفلي بالكامل -->
-    </div>
+        </div>
 
-    <!-- حاوية صندوق الرسائل (خارج حاوية التطبيق) -->
     <div class="message-box-container" id="messageBoxContainer">
         <div class="message-box">
             <div class="message-box-title" id="messageBoxTitle"></div>
@@ -315,6 +301,11 @@
         const auth = getAuth(app);
         const analytics = getAnalytics(app); 
         let userId = null; // سيتم تحديثه بعد المصادقة المجهولة
+
+        // تعريف مفتاح API وعنوان URL لـ Gemini هنا ليكون متاحاً عالمياً
+        const GEMINI_API_KEY = "AIzaSyAc7bJpt_8Ia0azCR8XZtU4oajgyqq-L78"; 
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+
 
         // وظيفة لعرض صندوق رسائل مخصص
         function showMessageBox(title, message) {
@@ -529,10 +520,7 @@
                     chatHistory.push({ role: "user", parts: [{ text: `اشرح المفهوم التالي بوضوح وإيجاز باللغة العربية: "${conceptText}"` }] });
                     
                     const payload = { contents: chatHistory };
-                    const apiKey = ""; 
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-                    const response = await fetch(apiUrl, {
+                    const response = await fetch(GEMINI_API_URL, { // استخدم المتغير المعرف عالمياً
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -577,13 +565,10 @@
 
                 try {
                     let chatHistory = [];
-                    chatHistory.push({ role: "user", parts: [{ text: `Translate the following Arabic text to English: "${text}"` }] });
+                    chatHistory.push({ role: "user", parts: [{ text: `Translate the following Arabic text to English. Respond with ONLY the translated text, no conversational filler or extra explanations: "${text}"` }] });
                     
                     const payload = { contents: chatHistory };
-                    const apiKey = ""; 
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-                    const response = await fetch(apiUrl, {
+                    const response = await fetch(GEMINI_API_URL, { // استخدم المتغير المعرف عالمياً
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -604,7 +589,8 @@
                         translatedText = "لم يتم العثور على ترجمة.";
                     }
                     
-                    translatedTextDisplay.textContent = `تم: ${text} → ${translatedText}`; // عرض الترجمة في div مخصص
+                    // تم التغيير هنا لعرض النص المترجم فقط
+                    translatedTextDisplay.textContent = translatedText; 
                 } catch (error) {
                     console.error("خطأ في الترجمة:", error);
                     translatedTextDisplay.textContent = 'حدث خطأ أثناء الترجمة. الرجاء المحاولة مرة أخرى.';

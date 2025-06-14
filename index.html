@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق الطلاب - جامعة النجف</title>
+    <!-- تضمين Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* الخط الرئيسي */
@@ -15,8 +16,8 @@
             overflow-x: hidden;
         }
 
-        /* حاوية المودال المخصص (لصناديق الرسائل) */
-        .custom-modal-container {
+        /* حاوية صندوق الرسائل */
+        .message-box-container {
             position: fixed;
             top: 0;
             left: 0;
@@ -32,18 +33,18 @@
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
-        .custom-modal-container.show {
+        .message-box-container.show {
             opacity: 1;
             visibility: visible;
         }
 
-        .custom-modal-content {
+        .message-box {
             background: white;
             padding: 25px;
             border-radius: 15px;
+            text-align: center;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            max-width: 90%;
-            width: 500px; /* عرض ثابت للمودال */
+            max-width: 80%;
             display: flex;
             flex-direction: column;
             gap: 15px;
@@ -53,14 +54,11 @@
             font-size: 20px;
             font-weight: bold;
             color: #333;
-            text-align: right; /* محاذاة العنوان لليمين */
         }
 
-        .message-box-body {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            text-align: right; /* محاذاة المحتوى لليمين */
+        .message-box-content {
+            font-size: 16px;
+            color: #555;
         }
 
         .message-box-button {
@@ -70,20 +68,25 @@
             border-radius: 10px;
             cursor: pointer;
             transition: background 0.2s ease;
-            align-self: center; /* توسيط الزر */
+            align-self: center;
         }
 
         .message-box-button:hover {
             background: #6d5ce7;
         }
 
-        /* زر التحميل */
-        .loading {
+        /* زر الترجمة بحالة التحميل */
+        .translate-btn.loading {
             cursor: not-allowed;
             opacity: 0.7;
         }
 
-        /* تصميم منشور الإشعارات */
+        /* تنسيقات الإشعارات الجديدة (منشورات) */
+        .notifications-container {
+            max-height: 400px; /* لتحديد أقصى ارتفاع يسمح بالتمرير */
+            overflow-y: auto; /* إضافة شريط تمرير عمودي */
+            padding-right: 10px; /* مسافة داخلية لتجنب تداخل شريط التمرير مع النص */
+        }
         .notification-post {
             background-color: #f9fafb; /* Light gray background */
             border-radius: 12px;
@@ -91,6 +94,7 @@
             margin-bottom: 15px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             border: 1px solid #e2e8f0; /* Light border */
+            text-align: right; /* محاذاة النص لليمين */
         }
 
         .notification-post-title {
@@ -98,51 +102,61 @@
             font-weight: 700; /* Bold */
             color: #333;
             margin-bottom: 8px;
-            text-align: right;
         }
 
         .notification-post-description {
-            font-size: 14px;
-            color: #4a5568; /* Darker gray for text */
+            font-size: 16px; /* تم تغيير الحجم إلى 16 بكسل */
+            color: #000; /* تم تغيير اللون إلى الأسود */
             margin-bottom: 8px;
             text-align: right;
         }
 
-        .notification-post-date {
-            font-size: 12px;
-            color: #718096; /* Lighter gray for date */
-            text-align: left; /* Align date to left */
-            font-weight: 500;
+        .notification-post-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: block; /* لجعل الصورة تأخذ عرضها الكامل وتزيل المساحات البيضاء */
+            margin-left: auto; /* لتوسيط الصورة إذا كانت أصغر من العرض الكامل */
+            margin-right: auto; /* لتوسيط الصورة إذا كانت أصغر من العرض الكامل */
         }
+
+        /* تم إزالة تنسيق .notification-post-date لعدم الحاجة إليه */
     </style>
 </head>
-<body class="font-inter bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-gray-800 overflow-x: hidden;">
+<body class="font-inter bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-gray-800 overflow-x-hidden">
     <div class="app-container max-w-md mx-auto bg-white bg-opacity-95 backdrop-blur-xl min-h-screen relative shadow-2xl rounded-lg overflow-hidden md:min-h-0 md:my-8 md:rounded-xl">
+        <!-- الرأس -->
         <header class="header flex justify-between items-center p-5 bg-gradient-to-tr from-indigo-600 to-purple-700 text-white relative overflow-hidden">
+            <!-- أيقونة البحث -->
             <svg class="header-icon w-7 h-7 cursor-pointer transition-all duration-200 hover:scale-105 relative z-10" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
             </svg>
             
+            <!-- الشعار والعنوان -->
             <div class="logo-container text-center relative z-10">
                 <div class="logo w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-300 rounded-full flex items-center justify-center text-2xl font-bold text-indigo-700 mx-auto mb-1 shadow-lg">ج</div>
-                <div class="app-title text-sm font-semibold opacity: 0.9;">جامعة النجف</div>
+                <div class="app-title text-sm font-semibold opacity-90">جامعة النجف</div>
             </div>
             
+            <!-- أيقونات الملف الشخصي والإشعارات -->
             <div class="flex gap-3 items-center">
+                <!-- أيقونة الإشعارات -->
                 <svg id="notificationBell" class="header-icon w-7 h-7 cursor-pointer transition-all duration-200 hover:scale-105 relative z-10" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
                 </svg>
+                <!-- صورة الملف الشخصي -->
                 <div class="profile-pic w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white font-bold cursor-pointer transition-all duration-200 hover:scale-105 relative z-10">أ</div>
             </div>
         </header>
 
+        <!-- المحتوى الرئيسي -->
         <main class="main-content p-6 pb-24">
-            <!-- قسم آخر المحاضرات - تمت إعادته -->
+            <!-- قسم المحاضرات الأخيرة -->
             <div class="recent-lectures-section mb-6">
-                <div id="lecturesList" class="lectures-list bg-white rounded-2xl p-5 shadow-lg">
-                    <h2 class="section-title text-xl font-bold text-gray-800 pb-4 mb-5 text-right border-b border-gray-200">آخر المحاضرات</h2>
-                    
-                    <!-- المحاضرات الثابتة -->
+                <h2 class="section-title text-xl font-bold text-gray-800 mb-5 text-right">آخر المحاضرات</h2>
+                <div class="lectures-list bg-white rounded-2xl p-5 shadow-lg">
+                    <!-- عنصر المحاضرة -->
                     <div class="lecture-item flex justify-between items-center py-4 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
                         <div class="lecture-info flex-1 text-right">
                             <div class="lecture-name text-base font-semibold text-gray-800 mb-1">محاضرة الرياضيات المتقدمة</div>
@@ -174,8 +188,13 @@
                 </div>
             </div>
 
+            <!-- شبكة بطاقات الميزات -->
             <div class="cards-grid grid grid-cols-2 gap-4 mb-6">
-                <!-- تم حذف بطاقة أحدث المحاضرات -->
+                <!-- بطاقة الميزة -->
+                <div class="feature-card bg-white p-5 rounded-2xl text-center cursor-pointer transition-all duration-200 shadow-lg hover:translate-y-[-3px] hover:shadow-xl relative overflow-hidden">
+                    <div class="card-icon w-10 h-10 mx-auto mb-3 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center text-lg text-white">📚</div>
+                    <div class="card-title text-sm font-semibold text-gray-800 relative z-10">أحدث المحاضرات</div>
+                </div>
                 <div class="feature-card bg-white p-5 rounded-2xl text-center cursor-pointer transition-all duration-200 shadow-lg hover:translate-y-[-3px] hover:shadow-xl relative overflow-hidden">
                     <div class="card-icon w-10 h-10 mx-auto mb-3 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center text-lg text-white">📅</div>
                     <div class="card-title text-sm font-semibold text-gray-800 relative z-10">جدول اليوم</div>
@@ -184,27 +203,66 @@
                     <div class="card-icon w-10 h-10 mx-auto mb-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center text-lg text-white">💡</div>
                     <div class="card-title text-sm font-semibold text-gray-800 relative z-10">شرح المفاهيم ✨</div>
                 </div>
-                <!-- تم حذف بطاقة الدرجات -->
+                <div class="feature-card bg-white p-5 rounded-2xl text-center cursor-pointer transition-all duration-200 shadow-lg hover:translate-y-[-3px] hover:shadow-xl relative overflow-hidden">
+                    <div class="card-icon w-10 h-10 mx-auto mb-3 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center text-lg text-white">🏆</div>
+                    <div class="card-title text-sm font-semibold text-gray-800 relative z-10">الدرجات</div>
+                </div>
             </div>
 
-            <div class="translation-section mb-6 grid grid-cols-1 gap-4">
-                <div class="translation-input-card bg-gradient-to-br from-cyan-500 to-blue-700 text-white p-5 rounded-2xl relative overflow-hidden">
-                    <h3 class="mb-4 text-base font-semibold">إدخال النص للترجمة</h3>
-                    <textarea id="translationInput" class="w-full p-3 border-none rounded-xl mb-4 text-sm bg-white bg-opacity-90 backdrop-blur-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 min-h-[100px]" placeholder="اكتب النص للترجمة..."></textarea>
-                    <button id="translateBtn" class="bg-white bg-opacity-20 border-2 border-white border-opacity-30 text-white px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 backdrop-blur-md hover:bg-opacity-30">ترجم الآن</button>
-                </div>
-                <div class="translation-output-card bg-white p-5 rounded-2xl shadow-lg relative overflow-hidden">
-                    <h3 class="mb-4 text-base font-semibold text-gray-800">النص المترجم</h3>
-                    <div id="translatedTextDisplay" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 text-right min-h-[100px] overflow-auto border border-gray-200">
-                        </div>
-                </div>
+            <!-- بطاقة الترجمة -->
+            <div class="translation-card bg-gradient-to-br from-cyan-500 to-blue-700 text-white p-5 rounded-2xl mb-5 relative overflow-hidden">
+                <h3 class="mb-4 text-base font-semibold">الترجمة السريعة</h3>
+                <input type="text" class="translation-input w-full p-3 border-none rounded-xl mb-4 text-sm bg-white bg-opacity-90 backdrop-blur-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300" placeholder="اكتب النص للترجمة...">
+                <div id="translatedTextDisplay" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 text-right min-h-[50px] overflow-auto border border-gray-200 mb-4"></div>
+                <button class="translate-btn bg-white bg-opacity-20 border-2 border-white border-opacity-30 text-white px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 backdrop-blur-md hover:bg-opacity-30">ترجم الآن</button>
             </div>
         </main>
+
+        <!-- التنقل السفلي -->
+        <nav class="bottom-nav fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white bg-opacity-95 backdrop-blur-xl p-4 border-t border-gray-200 rounded-t-3xl shadow-xl">
+            <div class="nav-items flex justify-around items-center">
+                <!-- عنصر التنقل -->
+                <div class="nav-item active flex flex-col items-center cursor-pointer transition-all duration-200 p-2 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700 text-white -translate-y-1 shadow-lg">
+                    <svg class="nav-icon w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                    <span class="nav-label text-xs font-medium">الرئيسية</span>
+                </div>
+                <div class="nav-item flex flex-col items-center cursor-pointer transition-all duration-200 p-2 rounded-xl hover:bg-indigo-100 hover:translate-y-[-1px]">
+                    <svg class="nav-icon w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"/>
+                    </svg>
+                    <span class="nav-label text-xs font-medium">المحاضرات</span>
+                </div>
+                <div class="nav-item flex flex-col items-center cursor-pointer transition-all duration-200 p-2 rounded-xl hover:bg-indigo-100 hover:translate-y-[-1px]">
+                    <svg class="nav-icon w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/>
+                    </svg>
+                    <span class="nav-label text-xs font-medium">الجدول</span>
+                </div>
+                <div class="nav-item flex flex-col items-center cursor-pointer transition-all duration-200 p-2 rounded-xl hover:bg-indigo-100 hover:translate-y-[-1px]">
+                    <svg class="nav-icon w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.01-4.65.47-6.8l-.46-.75c-.11-.19-.26-.37-.42-.53L12 16.47l.87-1.4zM21.5 11.5c0-5.25-4.25-9.5-9.5-9.5S2.5 6.25 2.5 11.5 6.75 21 12 21s9.5-4.25 9.5-9.5zM12 20c-4.69 0-8.5-3.81-8.5-8.5S7.31 3 12 3s8.5 3.81 8.5 8.5S16.69 20 12 20z"/>
+                    </svg>
+                    <span class="nav-label text-xs font-medium">الترجمة</span>
+                </div>
+                <div class="nav-item flex flex-col items-center cursor-pointer transition-all duration-200 p-2 rounded-xl hover:bg-indigo-100 hover:translate-y-[-1px]">
+                    <svg class="nav-icon w-6 h-6 mb-1" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                    </svg>
+                    <span class="nav-label text-xs font-medium">المزيد</span>
+                </div>
+            </div>
+        </nav>
     </div>
 
-    <div class="custom-modal-container" id="customModalContainer">
-        <div class="custom-modal-content" id="customModalContent">
-            </div>
+    <!-- حاوية صندوق الرسائل (خارج حاوية التطبيق) -->
+    <div class="message-box-container" id="messageBoxContainer">
+        <div class="message-box">
+            <div class="message-box-title" id="messageBoxTitle"></div>
+            <div class="message-box-content" id="messageBoxContent"></div>
+            <button class="message-box-button" id="messageBoxButton">موافق</button>
+        </div>
     </div>
 
     <script type="module">
@@ -213,7 +271,6 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
         import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js";
-
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -230,96 +287,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const analytics = getAnalytics(app); // تهيئة Google Analytics
+        const analytics = getAnalytics(app); 
         let userId = null; // سيتم تحديثه بعد المصادقة المجهولة
 
-        // وظيفة لفتح مودال مخصص بمحتوى ديناميكي (بديل لـ alert)
-        function openCustomModal(title, contentHtml) {
-            const container = document.getElementById('customModalContainer');
-            const modalContentDiv = document.getElementById('customModalContent');
-
-            modalContentDiv.innerHTML = `
-                <div class="message-box-title">${title}</div>
-                <div class="message-box-body">${contentHtml}</div>
-                <button class="message-box-button" id="customModalCloseButton">موافق</button>
-            `;
+        // وظيفة لعرض صندوق رسائل مخصص
+        function showMessageBox(title, message) {
+            const container = document.getElementById('messageBoxContainer');
+            document.getElementById('messageBoxTitle').textContent = title;
+            document.getElementById('messageBoxContent').innerHTML = message; // استخدام innerHTML للسماح بمحتوى HTML
             container.classList.add('show');
 
-            document.getElementById('customModalCloseButton').onclick = () => {
-                closeCustomModal();
+            document.getElementById('messageBoxButton').onclick = () => {
+                container.classList.remove('show');
             };
-            container.onclick = (e) => {
-                if (e.target === container) {
-                    closeCustomModal();
-                }
-            };
-        }
-
-        // وظيفة لإغلاق المودال المخصص
-        function closeCustomModal() {
-            const container = document.getElementById('customModalContainer');
-            container.classList.remove('show');
-            document.getElementById('customModalContent').innerHTML = ''; 
-        }
-
-        // وظيفة لعرض صندوق رسائل بسيط
-        function showMessageBox(title, message) {
-            openCustomModal(title, `<div class="message-box-content">${message}</div>`);
-        }
-
-        // وظيفة لمعالجة شرح المفهوم باستخدام Gemini API
-        async function explainConcept() {
-            const conceptInput = document.getElementById('conceptInput');
-            const conceptText = conceptInput.value.trim();
-            const explainBtn = document.getElementById('explainConceptBtn');
-            const resultDisplay = document.getElementById('conceptResult');
-
-            if (!conceptText) {
-                showMessageBox('خطأ', 'الرجاء إدخال مفهوم لشرحه.');
-                return;
-            }
-
-            explainBtn.textContent = 'جاري الشرح...';
-            explainBtn.classList.add('loading'); // إضافة فئة التحميل
-            explainBtn.disabled = true;
-            resultDisplay.textContent = 'جاري المعالجة...'; // عرض رسالة تحميل
-
-            try {
-                let chatHistory = [];
-                chatHistory.push({ role: "user", parts: [{ text: `اشرح المفهوم التالي بوضوح وإيجاز باللغة العربية: "${conceptText}"` }] });
-                
-                const payload = { contents: chatHistory };
-                const apiKey = ""; // سيتم توفير مفتاح API بواسطة Canvas تلقائيًا
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`خطأ في HTTP! الحالة: ${response.status}`);
-                }
-
-                const result = await response.json();
-                let explanation = "لم يتم العثور على شرح.";
-
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    explanation = result.candidates[0].content.parts[0].text;
-                }
-                resultDisplay.textContent = explanation;
-
-            } catch (error) {
-                console.error("خطأ في شرح المفهوم:", error);
-                resultDisplay.textContent = 'حدث خطأ أثناء الشرح. الرجاء المحاولة مرة أخرى.';
-            } finally {
-                explainBtn.textContent = 'شرح المفهوم ✨';
-                explainBtn.classList.remove('loading'); // إزالة فئة التحميل
-                explainBtn.disabled = false;
-            }
         }
 
         // دالة جلب وعرض الإشعارات من Firebase Firestore بتصميم المنشورات
@@ -343,16 +323,22 @@
                 } else {
                     notificationsHtml = '<div class="notifications-container">'; // حاوية للمنشورات
                     notificationsData.forEach(notification => {
-                        const title = notification.title || 'إشعار جديد'; // استخدام حقل العنوان أو افتراضي
-                        // استخدم 'description' أولاً، ثم 'message' كبديل للوصف
+                        const title = notification.title || 'إشعار جديد'; 
                         const description = notification.description || notification.message || 'لا يوجد نص وصفي للإشعار.';
-                        const date = notification.date || 'لا يوجد تاريخ';
+                        const imageUrl = notification.imageUrl || ''; // جلب رابط الصورة
+                        // تم إزالة جلب حقل التاريخ هنا
+
+                        let imageTag = '';
+                        if (imageUrl) {
+                            imageTag = `<img src="${imageUrl}" alt="صورة إشعار" class="notification-post-image">`;
+                        }
 
                         notificationsHtml += `
                             <div class="notification-post">
+                                ${imageTag}
                                 <div class="notification-post-title">${title}</div>
                                 <div class="notification-post-description">${description}</div>
-                                <div class="notification-post-date">${date}</div>
+                                <!-- تم إزالة عرض التاريخ هنا -->
                             </div>
                         `;
                     });
@@ -363,29 +349,37 @@
                 console.error("خطأ في جلب الإشعارات من Firebase:", error);
                 notificationsHtml = `<div class="text-center text-red-500 py-4">فشل تحميل الإشعارات: ${error.message}. <br>الرجاء التأكد من تفعيل المصادقة المجهولة (Anonymous) في Firebase والتأكد من قواعد أمان Firestore لمجموعة 'notifications'.</div>`;
             }
-            openCustomModal('إشعارات', notificationsHtml);
+            showMessageBox('إشعارات', notificationsHtml); // عرض الإشعارات في صندوق الرسائل
         }
 
+
         document.addEventListener('DOMContentLoaded', function() {
+            // إضافة وظيفة للأزرار وعناصر التنقل
+            const navItems = document.querySelectorAll('.nav-item');
             const featureCards = document.querySelectorAll('.feature-card');
-            const translateBtn = document.getElementById('translateBtn'); 
-            const translationInput = document.getElementById('translationInput'); 
-            const translatedTextDisplay = document.getElementById('translatedTextDisplay'); 
+            const translateBtn = document.querySelector('.translate-btn');
+            const translationInput = document.querySelector('.translation-input');
+            const translatedTextDisplay = document.getElementById('translatedTextDisplay'); // إضافة هذا العنصر
+            const lectureItems = document.querySelectorAll('.lecture-item');
             const headerIcons = document.querySelectorAll('.header-icon, .profile-pic');
             const notificationBell = document.getElementById('notificationBell'); // أيقونة الجرس
 
-            // معالجة النقر على عناصر المحاضرة الثابتة
-            const lectureItems = document.querySelectorAll('.lecture-item');
-            lectureItems.forEach(item => {
+            // تأثير النقر على عناصر التنقل
+            navItems.forEach(item => {
                 item.addEventListener('click', function() {
-                    const lectureName = this.querySelector('.lecture-name').textContent;
-                    showMessageBox('فتح محاضرة', `فتح محاضرة: ${lectureName}`);
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active', 'bg-gradient-to-br', 'from-indigo-600', 'to-purple-700', 'text-white', '-translate-y-1', 'shadow-lg');
+                        nav.classList.add('hover:bg-indigo-100', 'hover:translate-y-[-1px]');
+                    });
+                    this.classList.add('active', 'bg-gradient-to-br', 'from-indigo-600', 'to-purple-700', 'text-white', '-translate-y-1', 'shadow-lg');
+                    this.classList.remove('hover:bg-indigo-100', 'hover:translate-y-[-1px]');
+
+                    // عرض رسالة حسب عنصر التنقل النشط
+                    const navLabel = this.querySelector('.nav-label').textContent;
+                    showMessageBox('الانتقال إلى', `تم الانتقال إلى: ${navLabel}`);
                 });
             });
 
-            // ربط حدث النقر على أيقونة الإشعارات (الجرس)
-            notificationBell.addEventListener('click', fetchNotificationsFromFirestore);
-            
             // تأثير النقر على بطاقات الميزات
             featureCards.forEach(card => {
                 card.addEventListener('click', function() {
@@ -394,21 +388,84 @@
                         this.style.transform = '';
                     }, 150);
                     const cardTitle = this.querySelector('.card-title').textContent;
-                    if (!this.classList.contains('concept-explainer')) { 
-                         showMessageBox('الوصول إلى الميزة', `تم الوصول إلى ميزة: ${cardTitle}`);
+                    // تم تعديل هذا الجزء للتعامل مع "شرح المفاهيم" بشكل خاص
+                    if (this.classList.contains('concept-explainer')) {
+                        openConceptExplainerModal(); // فتح المودال الخاص بشرح المفاهيم
                     } else {
-                        const conceptExplainerContent = `
-                            <textarea id="conceptInput" class="w-full p-3 border border-gray-300 rounded-xl mb-4 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-300" placeholder="اكتب المفهوم الذي تريد شرحه..."></textarea>
-                            <button id="explainConceptBtn" class="bg-indigo-600 text-white px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 hover:bg-indigo-700 active:scale-95">شرح المفهوم ✨</button>
-                            <div id="conceptResult" class="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-gray-700 text-right min-h-[50px] overflow-auto"></div>
-                        `;
-                        openCustomModal('شرح المفاهيم', conceptExplainerContent);
-                        document.getElementById('explainConceptBtn').addEventListener('click', explainConcept);
+                        showMessageBox('الوصول إلى الميزة', `تم الوصول إلى ميزة: ${cardTitle}`);
                     }
                 });
             });
 
-            // وظيفة الترجمة (محاكاة بدون API)
+            // وظيفة لفتح مودال شرح المفاهيم (مع اتصال Gemini API)
+            async function openConceptExplainerModal() {
+                const conceptExplainerContent = `
+                    <textarea id="conceptInput" class="w-full p-3 border border-gray-300 rounded-xl mb-4 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-300" placeholder="اكتب المفهوم الذي تريد شرحه..."></textarea>
+                    <button id="explainConceptBtn" class="bg-indigo-600 text-white px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 hover:bg-indigo-700 active:scale-95">شرح المفهوم ✨</button>
+                    <div id="conceptResult" class="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-gray-700 text-right min-h-[50px] overflow-auto"></div>
+                `;
+                showMessageBox('شرح المفاهيم', conceptExplainerContent);
+                // ربط معالج الحدث بعد إنشاء العنصر في DOM
+                document.getElementById('explainConceptBtn').addEventListener('click', explainConcept);
+            }
+
+            // وظيفة لمعالجة شرح المفهوم باستخدام Gemini API
+            async function explainConcept() {
+                const conceptInput = document.getElementById('conceptInput');
+                const conceptText = conceptInput.value.trim();
+                const explainBtn = document.getElementById('explainConceptBtn');
+                const resultDisplay = document.getElementById('conceptResult');
+
+                if (!conceptText) {
+                    resultDisplay.textContent = 'الرجاء إدخال مفهوم لشرحه.';
+                    return;
+                }
+
+                explainBtn.textContent = 'جاري الشرح...';
+                explainBtn.classList.add('loading'); 
+                explainBtn.disabled = true;
+                resultDisplay.textContent = 'جاري المعالجة...'; 
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: `اشرح المفهوم التالي بوضوح وإيجاز باللغة العربية: "${conceptText}"` }] });
+                    
+                    const payload = { contents: chatHistory };
+                    const apiKey = ""; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`خطأ في HTTP! الحالة: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    let explanation = "لم يتم العثور على شرح.";
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        explanation = result.candidates[0].content.parts[0].text;
+                    }
+                    resultDisplay.textContent = explanation;
+
+                } catch (error) {
+                    console.error("خطأ في شرح المفهوم:", error);
+                    resultDisplay.textContent = 'حدث خطأ أثناء الشرح. الرجاء المحاولة مرة أخرى.';
+                } finally {
+                    explainBtn.textContent = 'شرح المفهوم ✨';
+                    explainBtn.classList.remove('loading'); 
+                    explainBtn.disabled = false;
+                }
+            }
+
+
+            // وظيفة الترجمة
             translateBtn.addEventListener('click', async function() {
                 const text = translationInput.value.trim();
                 if (!text) {
@@ -417,23 +474,70 @@
                 }
 
                 this.textContent = 'جاري الترجمة...';
-                setTimeout(() => {
+                this.classList.add('loading');
+                this.disabled = true;
+
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: `Translate the following Arabic text to English: "${text}"` }] });
+                    
+                    const payload = { contents: chatHistory };
+                    const apiKey = ""; 
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    let translatedText = "خطأ في الترجمة";
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        translatedText = result.candidates[0].content.parts[0].text;
+                    } else {
+                        translatedText = "لم يتم العثور على ترجمة.";
+                    }
+                    
+                    translatedTextDisplay.textContent = `تم: ${text} → ${translatedText}`; // عرض الترجمة في div مخصص
+                } catch (error) {
+                    console.error("خطأ في الترجمة:", error);
+                    translatedTextDisplay.textContent = 'حدث خطأ أثناء الترجمة. الرجاء المحاولة مرة أخرى.';
+                } finally {
                     this.textContent = 'ترجم الآن';
-                    translatedTextDisplay.textContent = 'هذا نص مترجم (محاكاة). النص الأصلي كان: "' + text + '"';
-                }, 1500);
+                    this.classList.remove('loading');
+                    this.disabled = false;
+                }
             });
 
-            // تأثير النقر على أيقونات الرأس الأخرى
+            // تأثير النقر على عناصر المحاضرة
+            lectureItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const lectureName = this.querySelector('.lecture-name').textContent;
+                    showMessageBox('فتح محاضرة', `فتح محاضرة: ${lectureName}`);
+                });
+            });
+
+            // تأثير النقر على أيقونات الرأس
             headerIcons.forEach(icon => {
-                // نتجنب أيقونة الجرس لأن لها معالج خاص بها الآن
-                if (icon.id !== 'notificationBell') {
+                // أيقونة الجرس لها معالج خاص بها
+                if (icon.id === 'notificationBell') {
+                    notificationBell.addEventListener('click', fetchNotificationsFromFirestore);
+                } else {
                     icon.addEventListener('click', function() {
                         this.style.transform = 'scale(0.9)';
                         setTimeout(() => {
                             this.style.transform = '';
                         }, 100);
                         const isProfile = this.classList.contains('profile-pic');
-                        const message = isProfile ? 'فتح الملف الشخصي' : 'فتح البحث'; // تم إزالة "الإشعارات" من هنا
+                        const message = isProfile ? 'فتح الملف الشخصي' : 'فتح البحث';
                         showMessageBox('وظيفة الرأس', message);
                     });
                 }

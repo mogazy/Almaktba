@@ -1,4 +1,332 @@
-// ربط حدث النقر على أيقونة الإشعارات (الجرس)
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق الطلاب - جامعة النجف</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* الخط الرئيسي */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* حاوية المودال المخصص (لصناديق الرسائل) */
+        .custom-modal-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .custom-modal-container.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .custom-modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 90%;
+            width: 500px; /* عرض ثابت للمودال */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-box-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            text-align: right; /* محاذاة العنوان لليمين */
+        }
+
+        .message-box-body {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            text-align: right; /* محاذاة المحتوى لليمين */
+        }
+
+        .message-box-button {
+            background: #4f46e5;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            align-self: center; /* توسيط الزر */
+        }
+
+        .message-box-button:hover {
+            background: #6d5ce7;
+        }
+
+        /* زر التحميل */
+        .loading {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="font-inter bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-gray-800 overflow-x: hidden;">
+    <div class="app-container max-w-md mx-auto bg-white bg-opacity-95 backdrop-blur-xl min-h-screen relative shadow-2xl rounded-lg overflow-hidden md:min-h-0 md:my-8 md:rounded-xl">
+        <header class="header flex justify-between items-center p-5 bg-gradient-to-tr from-indigo-600 to-purple-700 text-white relative overflow-hidden">
+            <svg class="header-icon w-7 h-7 cursor-pointer transition-all duration-200 hover:scale-105 relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            
+            <div class="logo-container text-center relative z-10">
+                <div class="logo w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-300 rounded-full flex items-center justify-center text-2xl font-bold text-indigo-700 mx-auto mb-1 shadow-lg">ج</div>
+                <div class="app-title text-sm font-semibold opacity: 0.9;">جامعة النجف</div>
+            </div>
+            
+            <div class="flex gap-3 items-center">
+                <svg id="notificationBell" class="header-icon w-7 h-7 cursor-pointer transition-all duration-200 hover:scale-105 relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                </svg>
+                <div class="profile-pic w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center text-white font-bold cursor-pointer transition-all duration-200 hover:scale-105 relative z-10">أ</div>
+            </div>
+        </header>
+
+        <main class="main-content p-6 pb-24">
+            <!-- قسم آخر المحاضرات - تمت إعادته -->
+            <div class="recent-lectures-section mb-6">
+                <div id="lecturesList" class="lectures-list bg-white rounded-2xl p-5 shadow-lg">
+                    <h2 class="section-title text-xl font-bold text-gray-800 pb-4 mb-5 text-right border-b border-gray-200">آخر المحاضرات</h2>
+                    
+                    <!-- المحاضرات الثابتة -->
+                    <div class="lecture-item flex justify-between items-center py-4 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
+                        <div class="lecture-info flex-1 text-right">
+                            <div class="lecture-name text-base font-semibold text-gray-800 mb-1">محاضرة الرياضيات المتقدمة</div>
+                            <div class="lecture-details text-sm text-gray-600">د. أحمد الحسيني • أمس 2:30 م</div>
+                        </div>
+                        <div class="lecture-status available px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-br from-emerald-500 to-green-600 text-white">متاح</div>
+                    </div>
+                    <div class="lecture-item flex justify-between items-center py-4 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
+                        <div class="lecture-info flex-1 text-right">
+                            <div class="lecture-name text-base font-semibold text-gray-800 mb-1">أساسيات البرمجة</div>
+                            <div class="lecture-details text-sm text-gray-600">د. سارة العلي • أمس 10:00 ص</div>
+                        </div>
+                        <div class="lecture-status available px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-br from-emerald-500 to-green-600 text-white">متاح</div>
+                    </div>
+                    <div class="lecture-item flex justify-between items-center py-4 border-b border-gray-100 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
+                        <div class="lecture-info flex-1 text-right">
+                            <div class="lecture-name text-base font-semibold text-gray-800 mb-1">الفيزياء النظرية</div>
+                            <div class="lecture-details text-sm text-gray-600">د. محمد الكاظم • الأحد 4:00 م</div>
+                        </div>
+                        <div class="lecture-status available px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-br from-emerald-500 to-green-600 text-white">متاح</div>
+                    </div>
+                    <div class="lecture-item flex justify-between items-center py-4 cursor-pointer transition-all duration-200 hover:bg-indigo-50 hover:mx-[-20px] hover:px-5 hover:rounded-xl">
+                        <div class="lecture-info flex-1 text-right">
+                            <div class="lecture-name text-base font-semibold text-gray-800 mb-1">التاريخ الإسلامي</div>
+                            <div class="lecture-details text-sm text-gray-600">د. فاطمة الزهراء • الأحد 11:30 ص</div>
+                        </div>
+                        <div class="lecture-status available px-4 py-2 rounded-full text-xs font-semibold bg-gradient-to-br from-emerald-500 to-green-600 text-white">متاح</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cards-grid grid grid-cols-2 gap-4 mb-6">
+                <!-- تم حذف بطاقة أحدث المحاضرات -->
+                <div class="feature-card bg-white p-5 rounded-2xl text-center cursor-pointer transition-all duration-200 shadow-lg hover:translate-y-[-3px] hover:shadow-xl relative overflow-hidden">
+                    <div class="card-icon w-10 h-10 mx-auto mb-3 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center text-lg text-white">📅</div>
+                    <div class="card-title text-sm font-semibold text-gray-800 relative z-10">جدول اليوم</div>
+                </div>
+                <div class="feature-card concept-explainer bg-white p-5 rounded-2xl text-center cursor-pointer transition-all duration-200 shadow-lg hover:translate-y-[-3px] hover:shadow-xl relative overflow-hidden">
+                    <div class="card-icon w-10 h-10 mx-auto mb-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center text-lg text-white">💡</div>
+                    <div class="card-title text-sm font-semibold text-gray-800 relative z-10">شرح المفاهيم ✨</div>
+                </div>
+                <!-- تم حذف بطاقة الدرجات -->
+            </div>
+
+            <div class="translation-section mb-6 grid grid-cols-1 gap-4">
+                <div class="translation-input-card bg-gradient-to-br from-cyan-500 to-blue-700 text-white p-5 rounded-2xl relative overflow-hidden">
+                    <h3 class="mb-4 text-base font-semibold">إدخال النص للترجمة</h3>
+                    <textarea id="translationInput" class="w-full p-3 border-none rounded-xl mb-4 text-sm bg-white bg-opacity-90 backdrop-blur-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300 min-h-[100px]" placeholder="اكتب النص للترجمة..."></textarea>
+                    <button id="translateBtn" class="bg-white bg-opacity-20 border-2 border-white border-opacity-30 text-white px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 backdrop-blur-md hover:bg-opacity-30">ترجم الآن</button>
+                </div>
+                <div class="translation-output-card bg-white p-5 rounded-2xl shadow-lg relative overflow-hidden">
+                    <h3 class="mb-4 text-base font-semibold text-gray-800">النص المترجم</h3>
+                    <div id="translatedTextDisplay" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 text-right min-h-[100px] overflow-auto border border-gray-200">
+                        </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="custom-modal-container" id="customModalContainer">
+        <div class="custom-modal-content" id="customModalContent">
+            </div>
+    </div>
+
+    <script type="module">
+        // استيراد وظائف Firebase المطلوبة
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-analytics.js";
+
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA85E5iXbpE_Y2VFh2SHC4G5l7wUkh7_Eg",
+            authDomain: "almktbh.firebaseapp.com",
+            projectId: "almktbh",
+            storageBucket: "almktbh.firebasestorage.app",
+            messagingSenderId: "506817404401",
+            appId: "1:506817404401:web:a826b307ab0fcb72a7f850",
+            measurementId: "G-MXNQL6JT3J"
+        };
+
+        // تهيئة Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const analytics = getAnalytics(app); // تهيئة Google Analytics
+        let userId = null; // سيتم تحديثه بعد المصادقة المجهولة
+
+        // وظيفة لفتح مودال مخصص بمحتوى ديناميكي (بديل لـ alert)
+        function openCustomModal(title, contentHtml) {
+            const container = document.getElementById('customModalContainer');
+            const modalContentDiv = document.getElementById('customModalContent');
+
+            modalContentDiv.innerHTML = `
+                <div class="message-box-title">${title}</div>
+                <div class="message-box-body">${contentHtml}</div>
+                <button class="message-box-button" id="customModalCloseButton">موافق</button>
+            `;
+            container.classList.add('show');
+
+            document.getElementById('customModalCloseButton').onclick = () => {
+                closeCustomModal();
+            };
+            container.onclick = (e) => {
+                if (e.target === container) {
+                    closeCustomModal();
+                }
+            };
+        }
+
+        // وظيفة لإغلاق المودال المخصص
+        function closeCustomModal() {
+            const container = document.getElementById('customModalContainer');
+            container.classList.remove('show');
+            document.getElementById('customModalContent').innerHTML = ''; 
+        }
+
+        // وظيفة لعرض صندوق رسائل بسيط
+        function showMessageBox(title, message) {
+            openCustomModal(title, `<div class="message-box-content">${message}</div>`);
+        }
+
+        // وظيفة لمعالجة شرح المفهوم باستخدام Gemini API (محاكاة فقط)
+        async function explainConcept() {
+            const conceptInput = document.getElementById('conceptInput');
+            const conceptText = conceptInput.value.trim();
+            const explainBtn = document.getElementById('explainConceptBtn');
+            const resultDisplay = document.getElementById('conceptResult');
+
+            if (!conceptText) {
+                showMessageBox('خطأ', 'الرجاء إدخال مفهوم لشرحه.');
+                return;
+            }
+
+            explainBtn.textContent = 'جاري الشرح...';
+            explainBtn.classList.add('loading'); // إضافة فئة التحميل
+            explainBtn.disabled = true;
+            resultDisplay.textContent = 'جاري المعالجة...'; // عرض رسالة تحميل
+
+            try {
+                // هذا الجزء هو للمحاكاة فقط في هذا الكود. API Key هنا فارغ.
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                // محاكاة استجابة Gemini API
+                setTimeout(() => {
+                    resultDisplay.textContent = 'هذه وظيفة لشرح المفاهيم. في تطبيق متكامل، سيتم استخدام نموذج ذكاء اصطناعي (مثل Gemini) هنا لشرح مفهوم "' + conceptText + '".';
+                    explainBtn.textContent = 'شرح المفهوم ✨';
+                    explainBtn.classList.remove('loading');
+                    explainBtn.disabled = false;
+                }, 1500);
+
+            } catch (error) {
+                console.error("خطأ في شرح المفهوم:", error);
+                resultDisplay.textContent = 'حدث خطأ أثناء الشرح. الرجاء المحاولة مرة أخرى.';
+                explainBtn.textContent = 'شرح المفهوم ✨';
+                explainBtn.classList.remove('loading');
+                explainBtn.disabled = false;
+            }
+        }
+
+        // دالة جلب وعرض الإشعارات من Firebase Firestore
+        async function fetchNotificationsFromFirestore() {
+            let notificationsContent = '<p>جاري تحميل الإشعارات...</p>';
+            try {
+                // التأكد من تسجيل الدخول المجهول قبل جلب البيانات
+                if (!userId) {
+                    await signInAnonymously(auth); 
+                    userId = auth.currentUser.uid;
+                    console.log("تم تسجيل الدخول كمستخدم مجهول. معرف المستخدم:", userId);
+                }
+                
+                const notificationsCol = collection(db, 'notifications'); // جلب من مجموعة 'notifications' مباشرة في الجذر
+                // يمكنك استخدام 'timestamp' للفرز إذا كان موجوداً في مستندات الإشعارات
+                const q = query(notificationsCol, orderBy('timestamp', 'desc')); 
+                const notificationSnapshot = await getDocs(q);
+                const notificationsData = notificationSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                if (notificationsData.length === 0) {
+                    notificationsContent = '<p>لا توجد إشعارات حالياً.</p>';
+                } else {
+                    notificationsContent = '<ul class="list-disc pr-5">'; // قائمة غير مرتبة
+                    notificationsData.forEach(notification => {
+                        // استخدام حقل 'message' للإشعار وحقل 'date' إن وجد
+                        notificationsContent += `<li class="mb-2 text-gray-700">${notification.message || 'لا يوجد نص للإشعار'} (${notification.date || 'لا يوجد تاريخ'})</li>`;
+                    });
+                    notificationsContent += '</ul>';
+                }
+
+            } catch (error) {
+                console.error("خطأ في جلب الإشعارات من Firebase:", error);
+                notificationsContent = `<p class="text-red-500">فشل تحميل الإشعارات: ${error.message}. <br>الرجاء التأكد من تفعيل المصادقة المجهولة (Anonymous) في Firebase والتأكد من قواعد أمان Firestore لمجموعة 'notifications'.</p>`;
+            }
+            openCustomModal('إشعارات', notificationsContent);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const featureCards = document.querySelectorAll('.feature-card');
+            const translateBtn = document.getElementById('translateBtn'); 
+            const translationInput = document.getElementById('translationInput'); 
+            const translatedTextDisplay = document.getElementById('translatedTextDisplay'); 
+            const headerIcons = document.querySelectorAll('.header-icon, .profile-pic');
+            const notificationBell = document.getElementById('notificationBell'); // أيقونة الجرس
+
+            // معالجة النقر على عناصر المحاضرة الثابتة (تمت إعادتها)
+            const lectureItems = document.querySelectorAll('.lecture-item');
+            lectureItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const lectureName = this.querySelector('.lecture-name').textContent;
+                    showMessageBox('فتح محاضرة', `فتح محاضرة: ${lectureName}`);
+                });
+            });
+
+            // ربط حدث النقر على أيقونة الإشعارات (الجرس)
             notificationBell.addEventListener('click', fetchNotificationsFromFirestore);
             
             // تأثير النقر على بطاقات الميزات
@@ -10,7 +338,7 @@
                     }, 150);
                     const cardTitle = this.querySelector('.card-title').textContent;
                     if (!this.classList.contains('concept-explainer')) { 
-                         showMessageBox('الوصول إلى الميزة', تم الوصول إلى ميزة: ${cardTitle});
+                         showMessageBox('الوصول إلى الميزة', `تم الوصول إلى ميزة: ${cardTitle}`);
                     } else {
                         const conceptExplainerContent = `
                             <textarea id="conceptInput" class="w-full p-3 border border-gray-300 rounded-xl mb-4 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-300" placeholder="اكتب المفهوم الذي تريد شرحه..."></textarea>

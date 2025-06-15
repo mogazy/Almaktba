@@ -147,6 +147,7 @@
             border-bottom: 1px solid #e2e8f0; /* خط فاصل خفيف */
             cursor: pointer;
             transition: all 0.2s ease-in-out; /* انتقال سلس للتحويم */
+            align-items: flex-start; /* محاذاة العناصر للأعلى */
         }
         .lecture-item:hover {
             background-color: #f3f4f6; /* لون خلفية أفتح عند التحويم */
@@ -214,17 +215,85 @@
         .translation-card {
             background: linear-gradient(to bottom right, #8b5cf6, #6b40e5); /* تدرج من أرجواني إلى نيلي داكن */
         }
+
+        /* تنسيقات عناصر القناة/المجموعة */
+        .channel-item {
+            padding-top: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            text-align: right; /* محاذاة النص لليمين */
+        }
+        .channel-item:hover {
+            background-color: rgba(255, 255, 255, 0.1); /* لون خلفية أفتح عند التحويم */
+            transform: scale(1.02); /* تكبير طفيف عند التحويم */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* ظل خفيف عند التحويم */
+            border-radius: 12px; /* زوايا دائرية عند التحويم */
+        }
+        .channel-item:last-child {
+            border-bottom: none;
+        }
+        .channel-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: white; /* النص أبيض */
+            margin-bottom: 4px;
+        }
+        .channel-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9); /* وصف أبيض شفاف قليلاً */
+        }
+
+        /* اللون المميز لبطاقة "أهم القنوات والمجموعات" */
+        .channels-groups-section {
+            background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 100%); /* تدرج من البنفسجي الغامق إلى الأرجواني */
+            color: white; /* لجعل النص أبيض فوق الخلفية الداكنة */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* ظل أغمق قليلاً */
+        }
+        .channels-groups-section .section-title {
+            color: white; /* التأكد من أن العنوان باللون الأبيض */
+            border-color: rgba(255, 255, 255, 0.3); /* خط فاصل أفتح ليتناسب مع الخلفية الداكنة */
+        }
+
+        /* تعديلات على اسم المحاضرة والمحاضر */
+        .lecture-name { /* اسم المحاضرة */
+            font-size: 1.125rem; /* 18px - حجم أكبر */
+            font-weight: bold; /* خط سميك */
+            color: #1a202c; /* لون أسود داكن */
+            margin-bottom: 4px; /* مسافة أقل بين العنوان والتفاصيل */
+        }
+        .lecture-details .lecturer-name { /* اسم المحاضر */
+            font-size: 16px; 
+            font-weight: bold; 
+            color: #000; 
+        }
+
+        /* تحريك جرس الإشعارات لجذب الانتباه */
+        @keyframes pulse-notification {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .notification-bell-animated {
+            animation: pulse-notification 1.5s infinite ease-in-out;
+        }
     </style>
 </head>
 <body class="font-inter bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-gray-800 overflow-x:hidden">
     <div class="app-container max-w-md mx-auto bg-white bg-opacity-95 backdrop-blur-xl min-h-screen relative shadow-2xl rounded-lg overflow-hidden md:min-h-0 md:my-8 md:rounded-xl">
         <header class="header flex justify-between items-center p-5 bg-gradient-to-tr from-indigo-600 to-purple-700 text-white relative overflow-hidden">
-            <div class="logo-container text-center relative z-10">
+            <!-- الشعار في أقصى اليمين -->
+            <div class="logo-container relative z-10"> 
                 <div class="logo">
                     <span class="logo-text">مكتبتي</span>
                 </div>
             </div>
             
+            <!-- زر البحث تمت إزالته سابقاً -->
+            
+            <!-- أيقونة الإشعارات في أقصى اليسار -->
             <div class="flex gap-3 items-center">
                 <svg id="notificationBell" class="header-icon w-7 h-7 cursor-pointer transition-all duration-200 hover:scale-105 relative z-10" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
@@ -259,12 +328,21 @@
                 </div>
             </div>
 
-            <div class="translation-card bg-gradient-to-br text-white p-5 rounded-2xl mb-5 relative overflow-hidden">
+            <div class="translation-card bg-gradient-to-br text-white p-5 rounded-2xl mb-6 relative overflow-hidden">
                 <h3 class="mb-4 text-base font-semibold">الترجمة السريعة</h3>
                 <input type="text" class="translation-input w-full p-3 border-none rounded-xl mb-4 text-sm bg-white bg-opacity-90 backdrop-blur-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300" placeholder="اكتب النص للترجمة...">
                 <div id="translatedTextDisplay" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 text-right min-h-[50px] overflow-auto border border-gray-200 mb-4"></div>
                 <button class="translate-btn bg-white bg-opacity-20 border-2 border-white border-opacity-30 text-white px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 backdrop-blur-md hover:bg-opacity-30">ترجم الآن</button>
             </div>
+
+            <!-- بطاقة أهم القنوات والمجموعات (باللون المميز ومحتوى ديناميكي) -->
+            <div class="channels-groups-section mb-6 rounded-2xl p-5 shadow-lg">
+                <h2 class="section-title text-xl font-bold pb-4 mb-5 text-right border-b">أهم القنوات والمجموعات</h2>
+                <div id="dynamicChannelsGroupsContainer">
+                    <div class="text-center text-white py-4" id="loadingChannelsGroups">جاري تحميل القنوات والمجموعات...</div>
+                </div>
+            </div>
+
         </main>
 
         </div>
@@ -340,9 +418,9 @@
                 } else {
                     notificationsHtml = '<div class="notifications-container">'; // حاوية للمنشورات
                     notificationsData.forEach(notification => {
-                        const title = notification.title || 'إشعار جديد'; 
-                        const description = notification.description || notification.message || 'لا يوجد نص وصفي للإشعار.';
-                        const imageUrl = notification.imageUrl || ''; // جلب رابط الصورة
+                        const title = notification.title || ''; 
+                        const description = notification.description || notification.message || ''; 
+                        const imageUrl = notification.imageUrl || ''; 
 
                         let imageTag = '';
                         if (imageUrl) {
@@ -370,37 +448,31 @@
         // دالة جلب وعرض المحاضرات من Firebase Firestore
         async function fetchLecturesFromFirestore() {
             const dynamicLecturesContainer = document.getElementById('dynamicLecturesContainer');
-            const loadingLectures = document.getElementById('loadingLectures'); // الحصول على عنصر رسالة التحميل
+            const loadingLectures = document.getElementById('loadingLectures'); 
 
-            // مسح المحتوى الحالي (بما في ذلك رسالة التحميل القديمة إن وجدت)
             dynamicLecturesContainer.innerHTML = '';
-            // إضافة رسالة التحميل الجديدة
             dynamicLecturesContainer.appendChild(loadingLectures);
 
             try {
-                // التأكد من تسجيل الدخول المجهول قبل جلب البيانات
                 if (!userId) {
                     await signInAnonymously(auth); 
                     userId = auth.currentUser.uid;
                     console.log("تم تسجيل الدخول كمستخدم مجهول. معرف المستخدم:", userId);
                 }
                 
-                // جلب البيانات من Cloud Firestore من مجموعة 'lectures' مباشرة
                 const lecturesCol = collection(db, 'lectures'); 
-                // نستخدم 'timestamp' للفرز الزمني. تأكد من وجود حقل timestamp في مستنداتك.
                 const q = query(lecturesCol, orderBy('timestamp', 'desc')); 
                 const lectureSnapshot = await getDocs(q);
                 const lecturesData = lectureSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                console.log("Lectures data fetched:", lecturesData); // طباعة البيانات التي تم جلبها
+                console.log("Lectures data fetched:", lecturesData);
 
-                // إزالة رسالة التحميل
                 if (loadingLectures) {
                     loadingLectures.remove();
                 }
 
                 if (lecturesData.length === 0) {
-                    dynamicLecturesContainer.innerHTML = '<div class="text-center text-gray-500 py-4">لا توجد محاضرات متاحة حالياً في قاعدة البيانات. <br>الرجاء التأكد من وجود مستندات في مجموعة "lectures" في Firestore، وأن حقل "timestamp" موجود للفرز.</div>';
+                    dynamicLecturesContainer.innerHTML = '<div class="text-center text-gray-500 py-4">لا توجد محاضرات متاحة حالياً في قاعدة البيانات.</div>';
                     return;
                 }
 
@@ -412,25 +484,34 @@
                         'hover:mx-[-20px]', 'hover:px-5', 'hover:rounded-xl'
                     );
 
-                    // إضافة خط فاصل ما لم يكن العنصر الأخير
                     if (index < lecturesData.length - 1) {
                         lectureItem.classList.add('border-b', 'border-gray-100');
                     }
 
-                    // عرض اسم المحاضرة والمحاضر فقط
+                    const lecturerPart = lecture.lecturer ? `<span class="lecturer-name">${lecture.lecturer}</span>` : '';
+                    const datePart = lecture.date ? lecture.date : '';
+                    let detailsHtml = '';
+
+                    if (lecturerPart && datePart) {
+                        detailsHtml = `${lecturerPart} • ${datePart}`;
+                    } else if (lecturerPart) {
+                        detailsHtml = lecturerPart;
+                    } else if (datePart) {
+                        detailsHtml = datePart;
+                    }
+
                     lectureItem.innerHTML = `
                         <div class="lecture-info flex-1 text-right">
-                            <div class="lecture-name text-base font-semibold text-gray-800 mb-1">${lecture.name || 'اسم المحاضرة غير متوفر'}</div>
-                            <div class="lecture-details text-sm text-gray-600">${lecture.lecturer || 'غير معروف'}</div>
+                            <div class="lecture-name">${lecture.name || ''}</div>
+                            <div class="lecture-details text-sm text-gray-600">${detailsHtml}</div>
                         </div>
                     `;
 
-                    // عند النقر، الانتقال إلى رابط المحاضرة في نفس النافذة
                     lectureItem.addEventListener('click', function() {
                         if (lecture.link) {
-                            window.location.href = lecture.link; // فتح الرابط في نفس النافذة/علامة التبويب
+                            window.location.href = lecture.link; 
                         } else {
-                            showMessageBox('رابط غير متوفر', `لا يوجد رابط للمحاضرة: ${lecture.name || 'غير معروف'}.`);
+                            showMessageBox('رابط غير متوفر', `لا يوجد رابط للمحاضرة: ${lecture.name || 'غير متوفر'}.`);
                         }
                     });
 
@@ -443,6 +524,70 @@
             }
         }
 
+        // دالة جلب وعرض القنوات والمجموعات من Firebase Firestore
+        async function fetchChannelsAndGroupsFromFirestore() {
+            const dynamicChannelsGroupsContainer = document.getElementById('dynamicChannelsGroupsContainer');
+            const loadingChannelsGroups = document.getElementById('loadingChannelsGroups'); 
+
+            dynamicChannelsGroupsContainer.innerHTML = ''; // مسح المحتوى الحالي
+            dynamicChannelsGroupsContainer.appendChild(loadingChannelsGroups); // إضافة رسالة التحميل
+
+            try {
+                if (!userId) {
+                    await signInAnonymously(auth); 
+                    userId = auth.currentUser.uid;
+                    console.log("تم تسجيل الدخول كمستخدم مجهول. معرف المستخدم:", userId);
+                }
+                
+                const channelsCol = collection(db, 'channels_and_groups'); // اسم المجموعة في Firestore
+                const q = query(channelsCol, orderBy('timestamp', 'desc')); // الفرز حسب Timestamp
+                const channelSnapshot = await getDocs(q);
+                const channelsData = channelSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                console.log("Channels and Groups data fetched:", channelsData);
+
+                if (loadingChannelsGroups) {
+                    loadingChannelsGroups.remove();
+                }
+
+                if (channelsData.length === 0) {
+                    dynamicChannelsGroupsContainer.innerHTML = '<div class="text-center text-white py-4">لا توجد قنوات أو مجموعات متاحة حالياً.</div>';
+                    return;
+                }
+
+                channelsData.forEach((channel, index) => {
+                    const channelItem = document.createElement('div');
+                    channelItem.classList.add(
+                        'channel-item', 'py-4', 'cursor-pointer', 'transition-all', 'duration-200', 
+                        'hover:bg-opacity-10', 'hover:mx-[-20px]', 'hover:px-5', 'hover:rounded-xl'
+                    );
+
+                    if (index < channelsData.length - 1) {
+                        channelItem.classList.add('border-b'); // Border color is handled by CSS
+                    }
+
+                    channelItem.innerHTML = `
+                        <div class="channel-name">${channel.name || ''}</div>
+                        <div class="channel-description text-sm">${channel.description || ''}</div>
+                    `;
+
+                    channelItem.addEventListener('click', function() {
+                        if (channel.link) {
+                            window.location.href = channel.link; // فتح الرابط في نفس النافذة
+                        } else {
+                            showMessageBox('رابط غير متوفر', `لا يوجد رابط للقناة/المجموعة: ${channel.name || 'غير متوفر'}.`);
+                        }
+                    });
+
+                    dynamicChannelsGroupsContainer.appendChild(channelItem);
+                });
+
+            } catch (error) {
+                console.error("خطأ في جلب القنوات والمجموعات من Firebase:", error);
+                dynamicChannelsGroupsContainer.innerHTML = `<div class="text-center text-red-300 py-4">فشل تحميل القنوات والمجموعات: ${error.message}. <br>الرجاء التأكد من إعداد Firebase الخاص بك وقواعد أمان Firestore لمجموعة 'channels_and_groups'.</div>`;
+            }
+        }
+
 
         document.addEventListener('DOMContentLoaded', function() {
             const featureCards = document.querySelectorAll('.feature-card');
@@ -451,11 +596,16 @@
             const translatedTextDisplay = document.getElementById('translatedTextDisplay'); 
             const notificationBell = document.getElementById('notificationBell'); // أيقونة الجرس
 
+            // إضافة فئة الحركة إلى جرس الإشعارات عند تحميل الصفحة
+            notificationBell.classList.add('notification-bell-animated');
+
             // استدعاء دالة جلب المحاضرات الديناميكية من Firebase عند تحميل الصفحة
             fetchLecturesFromFirestore();
+            // استدعاء دالة جلب القنوات والمجموعات الديناميكية من Firebase عند تحميل الصفحة
+            fetchChannelsAndGroupsFromFirestore();
 
             // ربط حدث النقر لبطاقة "جدول اليوم"
-            const todayScheduleCard = document.getElementById('todayScheduleCard'); // تأكد من الحصول على العنصر
+            const todayScheduleCard = document.getElementById('todayScheduleCard'); 
             if (todayScheduleCard) {
                 todayScheduleCard.addEventListener('click', function() {
                     this.style.transform = 'scale(0.95)';
@@ -520,7 +670,7 @@
                     chatHistory.push({ role: "user", parts: [{ text: `اشرح المفهوم التالي بوضوح وإيجاز باللغة العربية: "${conceptText}"` }] });
                     
                     const payload = { contents: chatHistory };
-                    const response = await fetch(GEMINI_API_URL, { // استخدم المتغير المعرف عالمياً
+                    const response = await fetch(GEMINI_API_URL, { 
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -565,10 +715,10 @@
 
                 try {
                     let chatHistory = [];
-                    chatHistory.push({ role: "user", parts: [{ text: `Translate the following Arabic text to English. Respond with ONLY the translated text, no conversational filler or extra explanations: "${text}"` }] });
+                    chatHistory.push({ role: "user", parts: [{ text: `Translate the following English text into Arabic. Respond with ONLY the translated text, no conversational filler or extra explanations: "${text}"` }] });
                     
                     const payload = { contents: chatHistory };
-                    const response = await fetch(GEMINI_API_URL, { // استخدم المتغير المعرف عالمياً
+                    const response = await fetch(GEMINI_API_URL, { 
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
@@ -589,7 +739,6 @@
                         translatedText = "لم يتم العثور على ترجمة.";
                     }
                     
-                    // تم التغيير هنا لعرض النص المترجم فقط
                     translatedTextDisplay.textContent = translatedText; 
                 } catch (error) {
                     console.error("خطأ في الترجمة:", error);
@@ -601,7 +750,7 @@
                 }
             });
 
-            // تأثير النقر على أيقونات الرأس (أيقونة الإشعارات)
+            // تأثير النقر على أيقونة الإشعارات (الجرس)
             notificationBell.addEventListener('click', fetchNotificationsFromFirestore);
         });
     </script>

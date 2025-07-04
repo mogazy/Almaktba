@@ -279,6 +279,17 @@
         .notification-bell-animated {
             animation: pulse-notification 0.3s ease-in-out 0s 10; /* يهتز 10 مرات في 3 ثوانٍ */
         }
+
+        /* أنماط الصفوف الفردية والزوجية للمحاضرات */
+        .lecture-item:nth-child(odd) {
+            background-color: #eef2ff; /* لون أغمق قليلاً للصفوف الفردية */
+        }
+        .lecture-item:nth-child(even) {
+            background-color: #f9fafb; /* لون أفتح قليلاً للصفوف الزوجية */
+        }
+        .lecture-item + .lecture-item {
+            border-top: 1px solid #e2e8f0; /* خط رفيع بين العناصر */
+        }
     </style>
 </head>
 <body class="font-inter bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-gray-800 overflow-x:hidden">
@@ -303,7 +314,7 @@
 
         <main class="main-content p-6 pb-24">
             <div class="recent-lectures-section mb-6 rounded-2xl p-5 shadow-lg">
-                <h2 class="section-title text-xl font-bold text-gray-800 pb-4 mb-5 text-right border-b border-gray-200">آخر المحاضرات</h2>
+                <h2 class="section-title text-2xl font-bold text-gray-800 pb-4 mb-5 text-right border-b border-gray-200">المحاضرات المتوفرة</h2>
                 <div id="dynamicLecturesContainer">
                     <div class="text-center text-gray-500 py-4" id="loadingLectures">جاري تحميل المحاضرات...</div>
                 </div>
@@ -314,7 +325,7 @@
                     <div class="gradient-wrapper indigo-gradient">
                         <div class="feature-card-content">
                             <div class="card-icon w-10 h-10 mx-auto mb-3 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center text-lg text-white">📅</div>
-                            <div class="card-title text-sm font-semibold text-gray-800 relative z-10">جدول اليوم</div>
+                            <div class="card-title text-sm font-semibold text-gray-800 relative z-10">جدول الأسبوع</div>
                         </div>
                     </div>
                 </div>
@@ -329,10 +340,10 @@
             </div>
 
             <div class="translation-card bg-gradient-to-br text-white p-5 rounded-2xl mb-6 relative overflow-hidden">
-                <h3 class="mb-4 text-base font-semibold">الترجمة السريعة</h3>
+                <h3 class="mb-4 text-xl font-bold">الترجمة السريعة</h3>
                 <input type="text" class="translation-input w-full p-3 border-none rounded-xl mb-4 text-sm bg-white bg-opacity-90 backdrop-blur-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300" placeholder="اكتب النص للترجمة...">
                 <div id="translatedTextDisplay" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 text-right min-h-[50px] overflow-auto border border-gray-200 mb-4"></div>
-                <button class="translate-btn bg-white bg-opacity-20 border-2 border-white border-opacity-30 text-white px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 backdrop-blur-md hover:bg-opacity-30">ترجم الآن</button>
+                <button class="translate-btn bg-white bg-opacity-20 border-2 border-white border-opacity-30 text-white px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 backdrop-blur-md hover:bg-opacity-30">ترجم للعربية</button>
             </div>
 
             <!-- بطاقة أهم القنوات والمجموعات (باللون المميز ومحتوى ديناميكي) -->
@@ -480,13 +491,17 @@
                     const lectureItem = document.createElement('div');
                     lectureItem.classList.add(
                         'lecture-item', 'flex', 'justify-between', 'items-center', 'py-4',
-                        'cursor-pointer', 'transition-all', 'duration-200', 'hover:bg-indigo-50',
+                        'cursor-pointer', 'transition-all', 'duration-200',
                         'hover:mx-[-20px]', 'hover:px-5', 'hover:rounded-xl'
                     );
 
-                    if (index < lecturesData.length - 1) {
-                        lectureItem.classList.add('border-b', 'border-gray-100');
+                    // إضافة الفئات لتبديل الألوان والخط الفاصل
+                    if (index % 2 === 0) {
+                        lectureItem.classList.add('bg-eef2ff'); // لون أغمق للصفوف الفردية
+                    } else {
+                        lectureItem.classList.add('bg-f9fafb'); // لون أفتح للصفوف الزوجية
                     }
+                    lectureItem.classList.add('border-b', 'border-gray-100'); // خط فاصل رفيع
 
                     const lecturerPart = lecture.lecturer ? `<span class="lecturer-name">${lecture.lecturer}</span>` : '';
                     const datePart = lecture.date ? lecture.date : '';
@@ -604,7 +619,7 @@
             // استدعاء دالة جلب القنوات والمجموعات الديناميكية من Firebase عند تحميل الصفحة
             fetchChannelsAndGroupsFromFirestore();
 
-            // ربط حدث النقر لبطاقة "جدول اليوم"
+            // ربط حدث النقر لبطاقة "جدول الأسبوع"
             const todayScheduleCard = document.getElementById('todayScheduleCard'); 
             if (todayScheduleCard) {
                 todayScheduleCard.addEventListener('click', function() {
@@ -612,13 +627,14 @@
                     setTimeout(() => {
                         this.style.transform = '';
                     }, 150);
-                    showMessageBox('الوصول إلى الميزة', 'تم الوصول إلى ميزة: جدول اليوم'); 
+                    // فتح الرابط المحدد لـ "جدول الأسبوع"
+                    window.location.href = 'https://t.me/Maktabatylastbot?start=jdwl'; 
                 });
             }
 
             // تأثير النقر على بطاقات الميزات الأخرى
             featureCards.forEach(card => {
-                // تجاوز بطاقة "جدول اليوم" لأن لديها معالج خاص بها الآن
+                // تجاوز بطاقة "جدول الأسبوع" لأن لديها معالج خاص بها الآن
                 if (card.id === 'todayScheduleCard') {
                     return; 
                 }
@@ -744,7 +760,7 @@
                     console.error("خطأ في الترجمة:", error);
                     translatedTextDisplay.textContent = 'حدث خطأ أثناء الترجمة. الرجاء المحاولة مرة أخرى.';
                 } finally {
-                    this.textContent = 'ترجم الآن';
+                    this.textContent = 'ترجم للعربية';
                     this.classList.remove('loading');
                     this.disabled = false;
                 }

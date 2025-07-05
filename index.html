@@ -54,14 +54,12 @@
         }
 
         .message-box-title {
-            /* تم تعديل هذا ليسمح بتنسيق الخط داخل الـ HTML الممرر */
             font-size: 20px; /* حجم افتراضي، سيتم تجاوزه بالـ inline style */
             font-weight: bold;
             color: #333;
         }
 
         .message-box-content {
-            /* تم تعديل هذا ليسمح بتنسيق الخط داخل الـ HTML الممرر */
             font-size: 16px; /* حجم افتراضي، سيتم تجاوزه بالـ inline style */
             color: #555;
         }
@@ -264,9 +262,64 @@
             background: linear-gradient(135deg, #66B2FF 0%, #4DA6FF 100%); /* تدرج أزرق فاتح عند التحويم */
         }
 
+        /* حاوية الأزرار للترجمة والنسخ */
+        .translation-buttons-container {
+            display: flex;
+            justify-content: flex-end; /* محاذاة الأزرار لليسار في RTL */
+            align-items: center;
+            gap: 10px; /* مسافة بين الأزرار */
+            margin-top: 15px; /* مسافة من الأعلى */
+        }
+
+        /* زر النسخ الجديد */
+        .copy-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            transition: opacity 0.2s ease, color 0.2s ease;
+            position: relative; /* للسماح بوضع رسالة "تم النسخ" */
+            padding: 5px; /* لجعل منطقة النقر أكبر قليلاً */
+            border-radius: 5px;
+        }
+        .copy-btn:hover {
+            opacity: 1;
+            color: #ADD8E6; /* لون أزرق فاتح عند التحويم */
+            background-color: rgba(255, 255, 255, 0.1); /* خلفية شفافة عند التحويم */
+        }
+        .copy-btn:active {
+            transform: scale(0.9);
+        }
+        /* رسالة "تم النسخ" */
+        .copy-message {
+            position: absolute;
+            bottom: 100%; /* فوق الزر */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            margin-bottom: 5px; /* مسافة بين الرسالة والزر */
+        }
+        .copy-btn.copied .copy-message {
+            opacity: 1;
+            visibility: visible;
+        }
+
 
         /* تنسيقات عناصر القناة/المجموعة */
         .channel-item {
+            display: flex; /* لجعل المحتوى وزر المشاركة في سطر واحد */
+            justify-content: space-between; /* لتوزيع المحتوى وزر المشاركة */
+            align-items: center; /* لمحاذاة العناصر عمودياً */
             padding-top: 20px;
             padding-bottom: 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* خط فاصل فاتح شفاف */
@@ -283,15 +336,33 @@
         .channel-item:last-child {
             border-bottom: none;
         }
-        .channel-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: white; /* النص أبيض */
-            margin-bottom: 4px;
+        .channel-info { /* حاوية لاسم ووصف القناة/المجموعة */
+            flex-grow: 1; /* لتأخذ المساحة المتبقية */
+            text-align: right;
         }
-        .channel-description {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.9); /* وصف أبيض شفاف قليلاً */
+
+        /* زر المشاركة داخل قائمة القنوات والمجموعات */
+        .share-channel-btn {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.4); /* إطار خفيف */
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap; /* لمنع النص من الالتفاف */
+            margin-right: 10px; /* مسافة عن النص في RTL */
+        }
+        .share-channel-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: white;
+        }
+        .share-channel-btn i {
+            font-size: 1rem;
         }
 
         /* اللون المميز لبطاقة "أهم القنوات والمجموعات" (أخضر داكن متدرج) */
@@ -349,9 +420,9 @@
             border-radius: 0 0 12px 12px; /* لجعل الزوايا السفلية دائرية إذا كان الـ app-container دائرياً */
         }
 
-        /* زر إعادة تشغيل البوت */
-        .restart-bot-btn {
-            background: linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%); /* تدرج أحمر جذاب */
+        /* زر مشاركة البوت الجديد */
+        .share-bot-btn {
+            background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%); /* تدرج أزرق سماوي جذاب */
             color: white;
             padding: 12px 20px;
             border-radius: 10px; /* زوايا مستديرة */
@@ -362,13 +433,13 @@
             gap: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4); /* ظل خفيف */
+            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4); /* ظل خفيف */
             margin-bottom: 20px; /* مسافة تحت الزر */
         }
 
-        .restart-bot-btn:hover {
+        .share-bot-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.6);
+            box-shadow: 0 6px 15px rgba(0, 188, 212, 0.6);
         }
     </style>
 </head>
@@ -393,10 +464,10 @@
         </header>
 
         <main class="main-content p-6 pb-24">
-            <!-- زر إعادة تشغيل البوت -->
-            <button class="restart-bot-btn w-full" onclick="window.location.href='https://t.me/Maktabatylastbot?start'">
-                <i class="fas fa-redo-alt"></i>
-                <span>إعادة تشغيل البوت</span>
+            <!-- زر مشاركة البوت الجديد -->
+            <button class="share-bot-btn w-full mb-6" id="shareBotButton">
+                <i class="fas fa-paper-plane"></i>
+                <span>شارك البوت</span>
             </button>
 
             <div class="recent-lectures-section mb-6 rounded-2xl p-5 shadow-lg">
@@ -428,8 +499,18 @@
             <div class="translation-card p-5 rounded-2xl mb-6 relative overflow-hidden">
                 <h3 class="mb-4 text-xl font-bold">الترجمة السريعة</h3>
                 <input type="text" class="translation-input w-full p-3 rounded-xl mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" placeholder="اكتب النص للترجمة...">
-                <div id="translatedTextDisplay" class="p-3 rounded-lg text-sm text-right min-h-[50px] overflow-auto mb-4"></div>
-                <button class="translate-btn px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 backdrop-blur-md">ترجم للعربية</button>
+                
+                <div id="translatedTextDisplay" class="p-3 rounded-lg text-sm text-right min-h-[50px] overflow-auto mb-4">
+                    <!-- النص المترجم سيظهر هنا -->
+                </div>
+
+                <div class="translation-buttons-container">
+                    <button class="translate-btn px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 backdrop-blur-md">ترجم للعربية</button>
+                    <button id="copyTranslatedTextBtn" class="copy-btn">
+                        <i class="far fa-copy"></i>
+                        <span class="copy-message">تم النسخ!</span>
+                    </button>
+                </div>
             </div>
 
             <!-- بطاقة أهم القنوات والمجموعات (باللون المميز ومحتوى ديناميكي) -->
@@ -673,18 +754,48 @@
                         channelItem.classList.add('border-b'); // Border color is handled by CSS
                     }
 
-                    channelItem.innerHTML = `
+                    const channelInfoDiv = document.createElement('div');
+                    channelInfoDiv.classList.add('channel-info');
+                    channelInfoDiv.innerHTML = `
                         <div class="channel-name">${channel.name || ''}</div>
                         <div class="channel-description text-sm">${channel.description || ''}</div>
                     `;
+                    channelItem.appendChild(channelInfoDiv);
 
-                    channelItem.addEventListener('click', function() {
+                    // زر المشاركة
+                    const shareButton = document.createElement('button');
+                    shareButton.classList.add('share-channel-btn');
+                    shareButton.innerHTML = '<i class="fas fa-share-alt"></i> <span>مشاركة</span>';
+                    shareButton.addEventListener('click', async (event) => {
+                        event.stopPropagation(); // منع تفعيل حدث النقر على عنصر القناة الأب
                         if (channel.link) {
-                            window.location.href = channel.link; // فتح الرابط في نفس النافذة
+                            try {
+                                if (navigator.share) {
+                                    await navigator.share({
+                                        title: `مشاركة ${channel.name}`,
+                                        text: `انضم إلى ${channel.name} على مكتبتي!`,
+                                        url: channel.link,
+                                    });
+                                    console.log('Link shared successfully');
+                                } else {
+                                    // Fallback for browsers that don't support Web Share API
+                                    const tempInput = document.createElement('textarea');
+                                    tempInput.value = `${channel.name}: ${channel.link}`;
+                                    document.body.appendChild(tempInput);
+                                    tempInput.select();
+                                    document.execCommand('copy');
+                                    document.body.removeChild(tempInput);
+                                    showMessageBox('تم النسخ', 'تم نسخ الرابط إلى الحافظة!');
+                                }
+                            } catch (error) {
+                                console.error('Error sharing the link:', error);
+                                showMessageBox('خطأ في المشاركة', 'حدث خطأ أثناء محاولة المشاركة.');
+                            }
                         } else {
-                            showMessageBox('رابط غير متوفر', `لا يوجد رابط للقناة/المجموعة: ${channel.name || 'غير متوفر'}.`);
+                            showMessageBox('رابط غير متوفر', `لا يوجد رابط لمشاركة القناة/المجموعة: ${channel.name || 'غير متوفر'}.`);
                         }
                     });
+                    channelItem.appendChild(shareButton);
 
                     dynamicChannelsGroupsContainer.appendChild(channelItem);
                 });
@@ -702,6 +813,8 @@
             const translationInput = document.querySelector('.translation-input');
             const translatedTextDisplay = document.getElementById('translatedTextDisplay'); 
             const notificationBell = document.getElementById('notificationBell'); // أيقونة الجرس
+            const copyTranslatedTextBtn = document.getElementById('copyTranslatedTextBtn'); // زر النسخ الجديد
+            const shareBotButton = document.getElementById('shareBotButton'); // زر مشاركة البوت الجديد
 
             // إضافة فئة الحركة إلى جرس الإشعارات عند تحميل الصفحة
             notificationBell.classList.add('notification-bell-animated');
@@ -857,6 +970,66 @@
                     this.disabled = false;
                 }
             });
+
+            // وظيفة النسخ إلى الحافظة
+            copyTranslatedTextBtn.addEventListener('click', function() {
+                const textToCopy = translatedTextDisplay.textContent.trim(); // إزالة المسافات البيضاء الزائدة
+
+                if (!textToCopy) { // التحقق مما إذا كان النص فارغًا
+                    showMessageBox('خطأ في النسخ', 'لا يوجد نص لنسخه.');
+                    return;
+                }
+                
+                const finalCopyText = textToCopy + " ترجمة مكتبتي @Maktabatylastbot";
+
+                // إنشاء عنصر textarea مؤقت لنسخ النص
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = finalCopyText;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    const copyMessage = this.querySelector('.copy-message');
+                    copyMessage.classList.add('copied'); // إضافة فئة لإظهار الرسالة
+                    setTimeout(() => {
+                        copyMessage.classList.remove('copied'); // إزالة الفئة لإخفاء الرسالة
+                    }, 1500); // إخفاء الرسالة بعد 1.5 ثانية
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    showMessageBox('خطأ في النسخ', 'لم يتمكن المتصفح من نسخ النص تلقائياً. الرجاء النسخ يدوياً.');
+                } finally {
+                    document.body.removeChild(tempTextArea);
+                }
+            });
+
+            // وظيفة مشاركة البوت
+            shareBotButton.addEventListener('click', async function() {
+                const shareText = "جرب افضل بوت محاضرات في العالم , بوت مكتبتي @Maktabatylastbot";
+                try {
+                    if (navigator.share) {
+                        await navigator.share({
+                            title: 'شارك بوت مكتبتي',
+                            text: shareText,
+                            url: 'https://t.me/Maktabatylastbot', // رابط البوت
+                        });
+                        console.log('Bot link shared successfully');
+                    } else {
+                        // Fallback for browsers that don't support Web Share API
+                        const tempInput = document.createElement('textarea');
+                        tempInput.value = shareText;
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(tempInput);
+                        showMessageBox('تم النسخ', 'تم نسخ نص مشاركة البوت إلى الحافظة!');
+                    }
+                } catch (error) {
+                    console.error('Error sharing the bot link:', error);
+                    showMessageBox('خطأ في المشاركة', 'حدث خطأ أثناء محاولة مشاركة البوت.');
+                }
+            });
+
 
             // تأثير النقر على أيقونة الإشعارات (الجرس)
             notificationBell.addEventListener('click', fetchNotificationsFromFirestore);

@@ -1003,31 +1003,13 @@
                 }
             });
 
-            // وظيفة مشاركة البوت
-            shareBotButton.addEventListener('click', async function() {
+            // وظيفة مشاركة البوت عبر تلجرام
+            shareBotButton.addEventListener('click', function() {
                 const shareText = "جرب افضل بوت محاضرات في العالم , بوت مكتبتي @Maktabatylastbot";
-                try {
-                    if (navigator.share) {
-                        await navigator.share({
-                            title: 'شارك بوت مكتبتي',
-                            text: shareText,
-                            url: 'https://t.me/Maktabatylastbot', // رابط البوت
-                        });
-                        console.log('Bot link shared successfully');
-                    } else {
-                        // Fallback for browsers that don't support Web Share API
-                        const tempInput = document.createElement('textarea');
-                        tempInput.value = shareText;
-                        document.body.appendChild(tempInput);
-                        tempInput.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(tempInput);
-                        showMessageBox('تم النسخ', 'تم نسخ نص مشاركة البوت إلى الحافظة!');
-                    }
-                } catch (error) {
-                    console.error('Error sharing the bot link:', error);
-                    showMessageBox('خطأ في المشاركة', 'حدث خطأ أثناء محاولة مشاركة البوت.');
-                }
+                const encodedText = encodeURIComponent(shareText);
+                const telegramShareUrl = `https://t.me/share/url?text=${encodedText}`;
+                
+                window.open(telegramShareUrl, '_blank'); // فتح الرابط في نافذة جديدة
             });
 
 

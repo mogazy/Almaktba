@@ -6,13 +6,16 @@
     <title>تطبيق مكتبتي</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* الخط الرئيسي */
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            /* خلفية متدرجة من الأبيض الناصع إلى الرمادي المزرق الباهت جداً */
+            background: linear-gradient(to right, #F8F9FA 0%, #EBF2F7 100%); /* أبيض ناصع إلى رمادي مزرق باهت */
             min-height: 100vh;
-            color: #333;
+            color: #333; /* لون نص داكن ليتناسب مع الخلفية الفاتحة */
             overflow-x: hidden;
         }
 
@@ -39,7 +42,7 @@
         }
 
         .message-box {
-            background: white;
+            background: white; /* خلفية بيضاء لصندوق الرسائل لسهولة القراءة */
             padding: 25px;
             border-radius: 15px;
             text-align: center;
@@ -51,18 +54,21 @@
         }
 
         .message-box-title {
-            font-size: 20px;
+            /* تم تعديل هذا ليسمح بتنسيق الخط داخل الـ HTML الممرر */
+            font-size: 20px; /* حجم افتراضي، سيتم تجاوزه بالـ inline style */
             font-weight: bold;
             color: #333;
         }
 
         .message-box-content {
-            font-size: 16px;
+            /* تم تعديل هذا ليسمح بتنسيق الخط داخل الـ HTML الممرر */
+            font-size: 16px; /* حجم افتراضي، سيتم تجاوزه بالـ inline style */
             color: #555;
         }
 
         .message-box-button {
-            background: #4f46e5;
+            /* لون زر صندوق الرسائل متدرج (أزرق فاتح ومريح) */
+            background: linear-gradient(135deg, #66B2FF 0%, #4DA6FF 100%); /* أزرق فاتح مريح */
             color: white;
             padding: 10px 20px;
             border-radius: 10px;
@@ -72,7 +78,8 @@
         }
 
         .message-box-button:hover {
-            background: #6d5ce7;
+            /* تدرج أغمق قليلاً عند التحويم (أزرق متوسط مريح) */
+            background: linear-gradient(135deg, #4DA6FF 0%, #3399FF 100%);
         }
 
         /* زر الترجمة بحالة التحميل */
@@ -88,7 +95,7 @@
             padding-right: 10px; /* مسافة داخلية لتجنب تداخل شريط التمرير مع النص */
         }
         .notification-post {
-            background-color: #f9fafb; /* Light gray background */
+            background-color: #f9fafb; /* Light gray background for notifications */
             border-radius: 12px;
             padding: 15px;
             margin-bottom: 15px;
@@ -100,7 +107,7 @@
         .notification-post-title {
             font-size: 16px;
             font-weight: 700; /* Bold */
-            color: #333;
+            color: #333; /* Dark text for notifications */
             margin-bottom: 8px;
         }
 
@@ -126,8 +133,8 @@
             font-family: 'Amiri', serif; /* تطبيق خط Amiri */
             font-size: 24px; /* حجم الخط */
             font-weight: 700; /* سمك الخط (غامق) */
-            color: #1a202c; /* لون نص الشعار (يمكن تعديله ليناسب التصميم) */
-            background: -webkit-linear-gradient(135deg, #FFD700, #FFA500); /* تدرج لوني للخلفية */
+            /* تدرج لوني للشعار يتناسب مع خلفية الرأس الجديدة */
+            background: linear-gradient(135deg, #ADD8E6, #87CEEB); /* أزرق فاتح مريح */
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: inline-block; /* لجعل التدرج يطبق بشكل صحيح */
@@ -140,6 +147,12 @@
             box-shadow: none;
         }
 
+        /* رأس الصفحة (Header) - ألوان جديدة وجميلة ومتدرجة */
+        .header {
+            background: linear-gradient(135deg, #4A00B2 0%, #8B008B 100%); /* تدرج من أرجواني داكن إلى بنفسجي غامق */
+            color: white; /* لون النص ليتناسب مع الخلفية الداكنة */
+        }
+
         /* تعديلات على عنصر المحاضرة لجذبها أكثر */
         .lecture-item {
             padding-top: 20px; /* زيادة المسافة العلوية */
@@ -148,12 +161,14 @@
             cursor: pointer;
             transition: all 0.2s ease-in-out; /* انتقال سلس للتحويم */
             align-items: flex-start; /* محاذاة العناصر للأعلى */
+            border-radius: 12px; /* جعل الإطار منحنيًا */
+            margin-bottom: 8px; /* مسافة بين العناصر */
+            overflow: hidden; /* لإخفاء أي محتوى يتجاوز الحدود المنحنية */
         }
         .lecture-item:hover {
             background-color: #f3f4f6; /* لون خلفية أفتح عند التحويم */
             transform: scale(1.02); /* تكبير طفيف عند التحويم */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* ظل خفيف عند التحويم */
-            border-radius: 12px; /* زوايا دائرية عند التحويم */
         }
         /* إزالة آخر حدود لآخر عنصر في القائمة */
         .lecture-item:last-child {
@@ -170,16 +185,18 @@
         }
 
         .gradient-wrapper.indigo-gradient {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed); /* تدرج يطابق Indigo 600 إلى Purple 700 */
+            /* تدرج لوني للبطاقة الأولى (أزرق فاتح ومريح) */
+            background: linear-gradient(135deg, #66B2FF, #4DA6FF);
         }
 
         .gradient-wrapper.emerald-gradient {
-            background: linear-gradient(135deg, #10b981, #0d9488); /* تدرج يطابق Emerald 500 إلى Teal 600 */
+            /* تدرج لوني للبطاقة الثانية (أخضر فاتح ومريح) */
+            background: linear-gradient(135deg, #98FB98, #7CFC00); /* أخضر فاتح مريح */
         }
 
         /* الجديد: المحتوى الداخلي لبطاقات الميزات */
         .feature-card-content {
-            background-color: #f5f6fa; /* لون فاتح يميل للأزرق/البنفسجي */
+            background-color: #f5f6fa; /* لون فاتح لخلفية البطاقات الداخلية */
             padding: 15px; /* المسافة البادئة الأصلية */
             border-radius: 10px; /* نصف قطر أصغر قليلاً للزوايا الداخلية المستديرة */
             text-align: center;
@@ -206,27 +223,59 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* ظل محسن عند التحويم */
         }
 
-        /* تغيير خلفية قسم المحاضرات */
+        /* تغيير خلفية قسم المحاضرات (تدرج من الأزرق الفاتح إلى الأرجواني الفاتح) */
         .recent-lectures-section {
-            background-color: #f5f6fa; /* لون فاتح يميل للأزرق/البنفسجي */
+            background: linear-gradient(135deg, #ADD8E6 0%, #E6E6FA 100%); /* أزرق فاتح إلى أرجواني فاتح */
+            color: #333; /* لون نص داكن */
+        }
+        /* عنوان قسم المحاضرات */
+        .recent-lectures-section .section-title {
+            color: #4A00B2; /* لون أرجواني داكن ليتناسب مع الخلفية الفاتحة */
+            border-color: #B0C4DE; /* لون أزرق رمادي للخط الفاصل */
         }
 
         /* تغيير تدرج بطاقة الترجمة */
         .translation-card {
-            background: linear-gradient(to bottom right, #8b5cf6, #6b40e5); /* تدرج من أرجواني إلى نيلي داكن */
+            /* تدرج لوني لبطاقة الترجمة (أزرق متوسط ومريح) */
+            background: linear-gradient(to bottom right, #3399FF, #1976D2); /* أزرق متوسط ومريح */
+            color: white; /* لون نص أبيض */
         }
+        .translation-card .translation-input {
+            background: rgba(255, 255, 255, 0.3); /* خلفية فاتحة شفافة لمدخل الترجمة */
+            color: white; /* نص أبيض */
+            border: 1px solid rgba(255, 255, 255, 0.5); /* حدود فاتحة شفافة */
+        }
+        .translation-card .translation-input::placeholder {
+            color: rgba(255, 255, 255, 0.8); /* لون فاتح شفاف للنص البديل */
+        }
+        .translation-card #translatedTextDisplay {
+            background: rgba(255, 255, 255, 0.3); /* خلفية فاتحة شفافة لعرض النص المترجم */
+            color: white; /* نص أبيض */
+            border: 1px solid rgba(255, 255, 255, 0.5); /* حدود فاتحة شفافة */
+        }
+        .translate-btn {
+            /* زر الترجمة بتدرج أزرق متوسط ومريح */
+            background: linear-gradient(135deg, #3399FF 0%, #1976D2 100%);
+            color: white;
+            /* إضافة إطار خفيف */
+            border: 1px solid rgba(255, 255, 255, 0.6); 
+        }
+        .translate-btn:hover {
+            background: linear-gradient(135deg, #66B2FF 0%, #4DA6FF 100%); /* تدرج أزرق فاتح عند التحويم */
+        }
+
 
         /* تنسيقات عناصر القناة/المجموعة */
         .channel-item {
             padding-top: 20px;
             padding-bottom: 20px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* خط فاصل فاتح شفاف */
             cursor: pointer;
             transition: all 0.2s ease-in-out;
             text-align: right; /* محاذاة النص لليمين */
         }
         .channel-item:hover {
-            background-color: rgba(255, 255, 255, 0.1); /* لون خلفية أفتح عند التحويم */
+            background-color: rgba(102, 178, 255, 0.1); /* لون خلفية أزرق فاتح شفاف عند التحويم */
             transform: scale(1.02); /* تكبير طفيف عند التحويم */
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* ظل خفيف عند التحويم */
             border-radius: 12px; /* زوايا دائرية عند التحويم */
@@ -245,28 +294,31 @@
             color: rgba(255, 255, 255, 0.9); /* وصف أبيض شفاف قليلاً */
         }
 
-        /* اللون المميز لبطاقة "أهم القنوات والمجموعات" */
+        /* اللون المميز لبطاقة "أهم القنوات والمجموعات" (أخضر داكن متدرج) */
         .channels-groups-section {
-            background: linear-gradient(135deg, #4c1d95 0%, #5b21b6 100%); /* تدرج من البنفسجي الغامق إلى الأرجواني */
+            background: linear-gradient(135deg, #006400 0%, #008000 100%); /* تدرج أخضر داكن */
             color: white; /* لجعل النص أبيض فوق الخلفية الداكنة */
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* ظل أغمق قليلاً */
         }
         .channels-groups-section .section-title {
-            color: white; /* التأكد من أن العنوان باللون الأبيض */
-            border-color: rgba(255, 255, 255, 0.3); /* خط فاصل أفتح ليتناسب مع الخلفية الداكنة */
+            color: white; /* تم تغيير لون العنوان إلى الأبيض */
+            border-color: rgba(152, 251, 152, 0.3); /* خط فاصل أخضر فاتح شفاف */
         }
 
         /* تعديلات على اسم المحاضرة والمحاضر */
         .lecture-name { /* اسم المحاضرة */
             font-size: 1.125rem; /* 18px - حجم أكبر */
             font-weight: bold; /* خط سميك */
-            color: #1a202c; /* لون أسود داكن */
+            color: #4A00B2; /* لون أرجواني داكن لاسم المحاضرة */
             margin-bottom: 4px; /* مسافة أقل بين العنوان والتفاصيل */
         }
         .lecture-details .lecturer-name { /* اسم المحاضر */
             font-size: 16px; 
             font-weight: bold; 
-            color: #000; 
+            color: #555; /* لون نص متوسط لاسم المحاضر */
+        }
+        .lecture-details {
+            color: #777; /* لون رمادي لتفاصيل المحاضرة */
         }
 
         /* تحريك جرس الإشعارات لجذب الانتباه */
@@ -282,19 +334,47 @@
 
         /* أنماط الصفوف الفردية والزوجية للمحاضرات */
         .lecture-item:nth-child(odd) {
-            background-color: #eef2ff; /* لون أغمق قليلاً للصفوف الفردية */
+            background-color: #F0F5F9; /* لون رمادي مزرق فاتح جداً للصفوف الفردية */
         }
         .lecture-item:nth-child(even) {
-            background-color: #f9fafb; /* لون أفتح قليلاً للصفوف الزوجية */
+            background-color: #FFFFFF; /* لون أبيض للصفوف الزوجية */
         }
         .lecture-item + .lecture-item {
-            border-top: 1px solid #e2e8f0; /* خط رفيع بين العناصر */
+            border-top: 1px solid #E6EFF5; /* خط رفيع بين العناصر بلون رمادي مزرق فاتح */
+        }
+
+        /* خلفية الـ main-content بتدرج رمادي خفيف جداً */
+        .main-content {
+            background: linear-gradient(to bottom, #FDFDFD 0%, #F5F5F5 100%); /* تدرج رمادي خفيف جداً */
+            border-radius: 0 0 12px 12px; /* لجعل الزوايا السفلية دائرية إذا كان الـ app-container دائرياً */
+        }
+
+        /* زر إعادة تشغيل البوت */
+        .restart-bot-btn {
+            background: linear-gradient(135deg, #FF6B6B 0%, #EE5253 100%); /* تدرج أحمر جذاب */
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px; /* زوايا مستديرة */
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4); /* ظل خفيف */
+            margin-bottom: 20px; /* مسافة تحت الزر */
+        }
+
+        .restart-bot-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.6);
         }
     </style>
 </head>
-<body class="font-inter bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-gray-800 overflow-x:hidden">
+<body class="font-inter min-h-screen overflow-x:hidden">
     <div class="app-container max-w-md mx-auto bg-white bg-opacity-95 backdrop-blur-xl min-h-screen relative shadow-2xl rounded-lg overflow-hidden md:min-h-0 md:my-8 md:rounded-xl">
-        <header class="header flex justify-between items-center p-5 bg-gradient-to-tr from-indigo-600 to-purple-700 text-white relative overflow-hidden">
+        <header class="header flex justify-between items-center p-5 relative overflow-hidden">
             <!-- الشعار في أقصى اليمين -->
             <div class="logo-container relative z-10"> 
                 <div class="logo">
@@ -313,8 +393,14 @@
         </header>
 
         <main class="main-content p-6 pb-24">
+            <!-- زر إعادة تشغيل البوت -->
+            <button class="restart-bot-btn w-full" onclick="window.location.href='https://t.me/Maktabatylastbot?start'">
+                <i class="fas fa-redo-alt"></i>
+                <span>إعادة تشغيل البوت</span>
+            </button>
+
             <div class="recent-lectures-section mb-6 rounded-2xl p-5 shadow-lg">
-                <h2 class="section-title text-2xl font-bold text-gray-800 pb-4 mb-5 text-right border-b border-gray-200">المحاضرات المتوفرة</h2>
+                <h2 class="section-title text-2xl font-bold pb-4 mb-5 text-right border-b">المحاضرات المتوفرة</h2>
                 <div id="dynamicLecturesContainer">
                     <div class="text-center text-gray-500 py-4" id="loadingLectures">جاري تحميل المحاضرات...</div>
                 </div>
@@ -324,7 +410,7 @@
                 <div class="feature-card cursor-pointer transition-all duration-200 relative overflow-hidden" id="todayScheduleCard">
                     <div class="gradient-wrapper indigo-gradient">
                         <div class="feature-card-content">
-                            <div class="card-icon w-10 h-10 mx-auto mb-3 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-lg flex items-center justify-center text-lg text-white">📅</div>
+                            <div class="card-icon w-10 h-10 mx-auto mb-3 rounded-lg flex items-center justify-center text-lg text-white">📅</div>
                             <div class="card-title text-sm font-semibold text-gray-800 relative z-10">جدول الأسبوع</div>
                         </div>
                     </div>
@@ -332,18 +418,18 @@
                 <div class="feature-card concept-explainer cursor-pointer transition-all duration-200 relative overflow-hidden">
                     <div class="gradient-wrapper emerald-gradient">
                         <div class="feature-card-content">
-                            <div class="card-icon w-10 h-10 mx-auto mb-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center text-lg text-white">💡</div>
+                            <div class="card-icon w-10 h-10 mx-auto mb-3 rounded-lg flex items-center justify-center text-lg text-white">💡</div>
                             <div class="card-title text-sm font-semibold text-gray-800 relative z-10">شرح المفاهيم ✨</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="translation-card bg-gradient-to-br text-white p-5 rounded-2xl mb-6 relative overflow-hidden">
+            <div class="translation-card p-5 rounded-2xl mb-6 relative overflow-hidden">
                 <h3 class="mb-4 text-xl font-bold">الترجمة السريعة</h3>
-                <input type="text" class="translation-input w-full p-3 border-none rounded-xl mb-4 text-sm bg-white bg-opacity-90 backdrop-blur-md text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300" placeholder="اكتب النص للترجمة...">
-                <div id="translatedTextDisplay" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-700 text-right min-h-[50px] overflow-auto border border-gray-200 mb-4"></div>
-                <button class="translate-btn bg-white bg-opacity-20 border-2 border-white border-opacity-30 text-white px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 backdrop-blur-md hover:bg-opacity-30">ترجم للعربية</button>
+                <input type="text" class="translation-input w-full p-3 rounded-xl mb-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" placeholder="اكتب النص للترجمة...">
+                <div id="translatedTextDisplay" class="p-3 rounded-lg text-sm text-right min-h-[50px] overflow-auto mb-4"></div>
+                <button class="translate-btn px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 backdrop-blur-md">ترجم للعربية</button>
             </div>
 
             <!-- بطاقة أهم القنوات والمجموعات (باللون المميز ومحتوى ديناميكي) -->
@@ -397,10 +483,10 @@
 
 
         // وظيفة لعرض صندوق رسائل مخصص
-        function showMessageBox(title, message) {
+        function showMessageBox(titleHtml, messageHtml) {
             const container = document.getElementById('messageBoxContainer');
-            document.getElementById('messageBoxTitle').textContent = title;
-            document.getElementById('messageBoxContent').innerHTML = message; // استخدام innerHTML للسماح بمحتوى HTML
+            document.getElementById('messageBoxTitle').innerHTML = titleHtml; // تم التغيير لاستخدام innerHTML
+            document.getElementById('messageBoxContent').innerHTML = messageHtml;
             container.classList.add('show');
 
             document.getElementById('messageBoxButton').onclick = () => {
@@ -492,7 +578,8 @@
                     lectureItem.classList.add(
                         'lecture-item', 'flex', 'justify-between', 'items-center', 'py-4',
                         'cursor-pointer', 'transition-all', 'duration-200',
-                        'hover:mx-[-20px]', 'hover:px-5', 'hover:rounded-xl'
+                        'hover:mx-[-20px]', 'hover:px-5', 'hover:rounded-xl',
+                        'px-4' // إضافة مسافة بادئة أفقية داخل العنصر
                     );
 
                     // إضافة الفئات لتبديل الألوان والخط الفاصل
@@ -501,7 +588,8 @@
                     } else {
                         lectureItem.classList.add('bg-f9fafb'); // لون أفتح للصفوف الزوجية
                     }
-                    lectureItem.classList.add('border-b', 'border-gray-100'); // خط فاصل رفيع
+                    // تم إزالة border-b من هنا لأنه سيتم التعامل معه بواسطة .lecture-item + .lecture-item
+                    // lectureItem.classList.add('border-b', 'border-gray-100'); 
 
                     const lecturerPart = lecture.lecturer ? `<span class="lecturer-name">${lecture.lecturer}</span>` : '';
                     const datePart = lecture.date ? lecture.date : '';
@@ -526,7 +614,11 @@
                         if (lecture.link) {
                             window.location.href = lecture.link; 
                         } else {
-                            showMessageBox('رابط غير متوفر', `لا يوجد رابط للمحاضرة: ${lecture.name || 'غير متوفر'}.`);
+                            // تعديل رسالة صندوق الرسائل لعرض اسم المحاضرة والمحاضر بخط كبير وواضح
+                            showMessageBox(
+                                `<span style="font-size: 28px; font-weight: bold; color: #4A00B2;">${lecture.name || 'اسم المحاضرة غير متوفر'}</span>`,
+                                `<span style="font-size: 24px; font-weight: bold; color: #555;">${lecture.lecturer || 'اسم المحاضر غير متوفر'}</span>`
+                            );
                         }
                     });
 

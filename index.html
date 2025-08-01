@@ -446,7 +446,7 @@
 
         
         .analytics-tutorials-btn {
-            background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%);
+            background: linear-gradient(135deg, ##ff6052 0%, #B91C1C 100%);
             color: white;
             padding: 12px 20px;
             border-radius: 10px;
@@ -471,23 +471,159 @@
 </head>
 <body class="font-inter min-h-screen overflow-x:hidden">
     <div class="app-container max-w-md mx-auto bg-white bg-opacity-95 backdrop-blur-xl min-h-screen relative shadow-2xl rounded-lg overflow-hidden md:min-h-0 md:my-8 md:rounded-xl">
-        <header class="header flex justify-between items-center p-5 relative overflow-hidden">
-            <!-- الشعار في أقصى اليمين -->
-            <div class="logo-container relative z-10"> 
-                <div class="logo">
-                    <span class="logo-text">مكتبتي</span>
-                </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مكتبتي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            direction: rtl;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f9;
+        }
+        .header {
+            background-color: #ffffff;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4a5568;
+        }
+        .rate-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 9999px; /* rounded-full */
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .rate-button:hover {
+            background-color: #45a049;
+            transform: scale(1.05);
+        }
+        .modal {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 1rem; /* rounded-xl */
+            padding: 2rem;
+            max-width: 90%;
+            width: 500px;
+            text-align: center;
+        }
+        .rating-number {
+            background-color: #d1d5db; /* gray-300 */
+            border-radius: 0.5rem; /* rounded-lg */
+            border: 1px solid transparent; /* transparent border for effect */
+            transition: all 0.2s;
+        }
+        .rating-number:hover {
+            background-color: #a0aec0; /* gray-400 */
+            transform: scale(1.1);
+        }
+        .rating-number.selected {
+            background-color: #4CAF50;
+            color: white;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+    <header class="header flex justify-between items-center p-5 relative overflow-hidden">
+        <div class="logo-container relative z-10">  
+            <div class="logo">
+                <span class="logo-text">مكتبتي</span>
             </div>
+        </div>
+        
+        <div class="flex gap-3 items-center">
+            <button id="rateButton" class="rate-button cursor-pointer transition-all duration-200">قيمنا</button>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto p-5 text-center">
+        <h1 class="text-3xl font-bold text-gray-800">مرحباً بك في مكتبتي</h1>
+        <p class="mt-4 text-gray-600">هذا هو محتوى الصفحة الرئيسي.</p>
+    </main>
+
+    <div id="ratingModal" class="modal fixed inset-0 flex items-center justify-center hidden z-50">
+        <div class="modal-content relative p-8 bg-white rounded-xl shadow-lg">
             
-            <!-- زر البحث تمت إزالته سابقاً -->
+            <h2 class="text-3xl font-extrabold text-gray-800 mb-4 leading-relaxed">
+                <span class="block text-4xl">لأنك مميز،</span>
+                <span class="block mt-2">نحن نهتم برأيك.</span>
+            </h2>
+
+            <p class="text-lg text-gray-600 mb-6 font-semibold">
+                تقييمنا هو <span class="text-xl font-bold text-green-600">9.2/10</span>
+            </p>
             
-            <!-- أيقونة الإشعارات في أقصى اليسار -->
-            <div class="flex gap-3 items-center">
-                <svg id="notificationBell" class="header-icon w-7 h-7 cursor-pointer transition-all duration-200 hover:scale-105 relative z-10" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-                </svg>
+            <p class="text-xl font-bold text-gray-700 mb-4">قيمنا</p>
+            <div class="flex justify-center flex-wrap gap-3">
+                <script>
+                    for (let i = 1; i <= 10; i++) {
+                        document.write(`<button class="rating-number w-10 h-10 flex items-center justify-center text-lg font-bold text-gray-700 cursor-pointer transition-all duration-200">${i}</button>`);
+                    }
+                </script>
             </div>
-        </header>
+
+            <div id="thankYouMessage" class="hidden mt-6">
+                <p class="text-xl font-bold text-green-600">شكراً على التقييم!</p>
+                <p class="text-sm text-gray-500 mt-2">ملاحظة: يتم تسجيل آخر تقييم فقط من أي مستخدم.</p>
+            </div>
+
+            <button id="closeModal" class="absolute top-4 left-4 text-gray-500 hover:text-gray-800 text-3xl font-bold">&times;</button>
+        </div>
+    </div>
+
+    <script>
+        const rateButton = document.getElementById('rateButton');
+        const ratingModal = document.getElementById('ratingModal');
+        const closeModal = document.getElementById('closeModal');
+        const ratingNumbers = document.querySelectorAll('.rating-number');
+        const thankYouMessage = document.getElementById('thankYouMessage');
+
+        // Show modal when "قيمنا" button is clicked
+        rateButton.addEventListener('click', () => {
+            ratingModal.classList.remove('hidden');
+        });
+
+        // Close modal when close button is clicked
+        closeModal.addEventListener('click', () => {
+            ratingModal.classList.add('hidden');
+            thankYouMessage.classList.add('hidden');
+            ratingNumbers.forEach(btn => btn.classList.remove('selected'));
+        });
+
+        // Close modal when clicking outside of it
+        ratingModal.addEventListener('click', (e) => {
+            if (e.target.id === 'ratingModal') {
+                ratingModal.classList.add('hidden');
+                thankYouMessage.classList.add('hidden');
+                ratingNumbers.forEach(btn => btn.classList.remove('selected'));
+            }
+        });
+
+        // Handle rating number clicks
+        ratingNumbers.forEach(numberBtn => {
+            numberBtn.addEventListener('click', (e) => {
+                // Remove 'selected' class from all buttons
+                ratingNumbers.forEach(btn => btn.classList.remove('selected'));
+                // Add 'selected' class to the clicked button
+                e.target.classList.add('selected');
+
+                // Show the thank you message
+                thankYouMessage.classList.remove('hidden');
+
+                // You can add logic here to save the rating
+                console.log(`تم تقييم المستخدم بـ: ${e.target.textContent}`);
+            });
+        });
+    </script>
 
     
         <main class="main-content p-6 pb-24">

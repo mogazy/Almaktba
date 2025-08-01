@@ -438,31 +438,28 @@
             box-shadow: 0 4px 10px rgba(0, 188, 212, 0.4); /* ظل خفيف */
             margin-bottom: 20px; /* مسافة تحت الزر */
         }
+
+        
+        /* تنسيقات الزر الجديد "شروحات التحليلات" */
+        .blood-donation-btn {
+            background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%); /* تدرج أحمر جذاب */
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px; /* زوايا مستديرة */
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); /* ظل خفيف */
+            margin-bottom: 20px; /* مسافة تحت الزر */
+        }
+
         .share-bot-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 188, 212, 0.6);
-        }
-
-        /* تنسيقات الزر الجديد "حملة التبرع بالدم" */
-        .blood-donation-btn {
-            background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%); /* تدرج أحمر جذاب */
-            color: white;
-            padding: 12px 20px;
-            border-radius: 10px; /* زوايا مستديرة */
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); /* ظل خفيف */
-            margin-bottom: 20px; /* مسافة تحت الزر */
-        }
-
-        .blood-donation-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(239, 68, 68, 0.6);
         }
     </style>
 </head>
@@ -494,11 +491,14 @@
                 <span>شارك البوت</span>
             </button>
 
-            <!-- الزر الجديد الذي يضيفه المستخدم -->
-            <a href="https://mogazy.github.io/Almaktba/blood.html" class="blood-donation-btn w-full mb-6">
-                <i class="fa-solid fa-microscope"></i>
-                <span> شروحات التحليلات </span>
-            </a>
+
+            <!-- الزر الجديد الذي يضيفه المستخدم -->
+            <a href="https://mogazy.github.io/Almaktba/blood.html" class="blood-donation-btn w-full mb-6">
+                <i class="fa-solid fa-microscope"></i>
+                <span> شروحات التحليلات </span>
+            </a>
+
+
 
             <div class="recent-lectures-section mb-6 rounded-2xl p-5 shadow-lg">
                 <h2 class="section-title text-2xl font-bold pb-4 mb-5 text-right border-b">المحاضرات المتوفرة</h2>
@@ -742,20 +742,17 @@
 
             } catch (error) {
                 console.error("خطأ في جلب المحاضرات من Firebase:", error);
-                if (loadingLectures) {
-                    loadingLectures.remove();
-                }
-                dynamicLecturesContainer.innerHTML = `<div class="text-center text-red-500 py-4">فشل تحميل المحاضرات: ${error.message}. <br>الرجاء التأكد من تفعيل المصادقة المجهولة (Anonymous) في Firebase والتأكد من قواعد أمان Firestore لمجموعة 'lectures'.</div>`;
+                dynamicLecturesContainer.innerHTML = `<div class="text-center text-red-500 py-4">فشل تحميل المحاضرات من Firebase. الرجاء التأكد من إعداد مشروع Firebase الخاص بك، وأن Cloud Firestore مفعّل، وأن قاعدة البيانات تحتوي على مجموعة 'lectures' في الجذر مباشرةً بقواعد أمان تسمح بالقراءة للجميع. تفاصيل الخطأ: ${error.message}. <br>تأكد أيضاً من وجود حقل "timestamp" من نوع Timestamp في مستنداتك للفرز.</div>`;
             }
         }
-        
-        // دالة جلب وعرض القنوات والمجموعات
-        async function fetchChannelsGroupsFromFirestore() {
+
+        // دالة جلب وعرض القنوات والمجموعات من Firebase Firestore
+        async function fetchChannelsAndGroupsFromFirestore() {
             const dynamicChannelsGroupsContainer = document.getElementById('dynamicChannelsGroupsContainer');
-            const loadingChannelsGroups = document.getElementById('loadingChannelsGroups');
-            
-            dynamicChannelsGroupsContainer.innerHTML = '';
-            dynamicChannelsGroupsContainer.appendChild(loadingChannelsGroups);
+            const loadingChannelsGroups = document.getElementById('loadingChannelsGroups'); 
+
+            dynamicChannelsGroupsContainer.innerHTML = ''; // مسح المحتوى الحالي
+            dynamicChannelsGroupsContainer.appendChild(loadingChannelsGroups); // إضافة رسالة التحميل
 
             try {
                 if (!userId) {
@@ -763,11 +760,13 @@
                     userId = auth.currentUser.uid;
                     console.log("تم تسجيل الدخول كمستخدم مجهول. معرف المستخدم:", userId);
                 }
+                
+                const channelsCol = collection(db, 'channels_and_groups'); // اسم المجموعة في Firestore
+                const q = query(channelsCol, orderBy('timestamp', 'desc')); 
+                const channelSnapshot = await getDocs(q);
+                const channelsData = channelSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                const channelsCol = collection(db, 'channels');
-                const q = query(channelsCol, orderBy('timestamp', 'desc'));
-                const channelsSnapshot = await getDocs(q);
-                const channelsData = channelsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                console.log("Channels and Groups data fetched:", channelsData);
 
                 if (loadingChannelsGroups) {
                     loadingChannelsGroups.remove();
@@ -778,165 +777,273 @@
                     return;
                 }
 
-                channelsData.forEach(channel => {
+                channelsData.forEach((channel, index) => {
                     const channelItem = document.createElement('div');
-                    channelItem.classList.add('channel-item');
-                    channelItem.innerHTML = `
-                        <div class="channel-info">
-                            <div class="font-bold">${channel.name}</div>
-                            <div class="text-sm opacity-80">${channel.description}</div>
-                        </div>
-                        <button class="share-channel-btn" onclick="event.stopPropagation(); window.location.href='${channel.link}'">
-                            <i class="fas fa-external-link-alt"></i>
-                            <span>انضم</span>
-                        </button>
+                    channelItem.classList.add(
+                        'channel-item', 'py-4', 'cursor-pointer', 'transition-all', 'duration-200', 
+                        'hover:bg-opacity-10', 'hover:mx-[-20px]', 'hover:px-5', 'hover:rounded-xl'
+                    );
+
+                    if (index < channelsData.length - 1) {
+                        channelItem.classList.add('border-b'); // Border color is handled by CSS
+                    }
+
+                    const channelInfoDiv = document.createElement('div');
+                    channelInfoDiv.classList.add('channel-info');
+                    channelInfoDiv.innerHTML = `
+                        <div class="channel-name">${channel.name || ''}</div>
+                        <div class="channel-description text-sm">${channel.description || ''}</div>
                     `;
+                    channelItem.appendChild(channelInfoDiv);
+
+                    // إضافة معالج النقر لعنصر القناة بأكمله
+                    channelItem.addEventListener('click', function() {
+                        if (channel.link) {
+                            window.open(channel.link, '_blank'); // فتح الرابط في نافذة جديدة
+                        } else {
+                            showMessageBox('رابط غير متوفر', `لا يوجد رابط للقناة/المجموعة: ${channel.name || 'غير متوفر'}.`);
+                        }
+                    });
+
+                    // زر المشاركة
+                    const shareButton = document.createElement('button');
+                    shareButton.classList.add('share-channel-btn');
+                    shareButton.innerHTML = '<i class="fas fa-share-alt"></i> <span>مشاركة</span>';
+                    shareButton.addEventListener('click', async (event) => {
+                        event.stopPropagation(); // منع تفعيل حدث النقر على عنصر القناة الأب
+                        if (channel.link) {
+                            const shareText = `انضم إلى ${channel.name}!`; // تم إزالة "على مكتبتي"
+                            const encodedShareText = encodeURIComponent(shareText);
+                            const encodedChannelLink = encodeURIComponent(channel.link);
+                            const telegramShareUrl = `https://t.me/share/url?url=${encodedChannelLink}&text=${encodedShareText}`;
+                            
+                            window.open(telegramShareUrl, '_blank'); // فتح الرابط في نافذة جديدة
+                        } else {
+                            showMessageBox('رابط غير متوفر', `لا يوجد رابط لمشاركة القناة/المجموعة: ${channel.name || 'غير متوفر'}.`);
+                        }
+                    });
+                    channelItem.appendChild(shareButton);
+
                     dynamicChannelsGroupsContainer.appendChild(channelItem);
                 });
 
             } catch (error) {
                 console.error("خطأ في جلب القنوات والمجموعات من Firebase:", error);
-                if (loadingChannelsGroups) {
-                    loadingChannelsGroups.remove();
-                }
-                dynamicChannelsGroupsContainer.innerHTML = `<div class="text-center text-red-300 py-4">فشل تحميل القنوات: ${error.message}. <br>الرجاء التأكد من تفعيل المصادقة المجهولة (Anonymous) في Firebase والتأكد من قواعد أمان Firestore لمجموعة 'channels'.</div>`;
+                dynamicChannelsGroupsContainer.innerHTML = `<div class="text-center text-red-300 py-4">فشل تحميل القنوات والمجموعات: ${error.message}. <br>الرجاء التأكد من إعداد Firebase الخاص بك وقواعد أمان Firestore لمجموعة 'channels_and_groups'.</div>`;
             }
         }
 
-        // دالة للترجمة باستخدام Gemini API مع آلية للتعامل مع الأخطاء
-        async function translateText(text) {
-            const translateButton = document.getElementById('translateButton');
-            translateButton.classList.add('loading');
-            translateButton.innerHTML = `<i class="fas fa-spinner fa-spin"></i> <span>جاري الترجمة...</span>`;
 
-            // تنفيذ آلية التراجع الأسي (Exponential Backoff)
-            let retries = 0;
-            const maxRetries = 5;
-            const delay = (ms) => new Promise(res => setTimeout(res, ms));
+        document.addEventListener('DOMContentLoaded', function() {
+            const featureCards = document.querySelectorAll('.feature-card');
+            const translateButton = document.getElementById('translateButton'); 
+            const translationInput = document.querySelector('.translation-input');
+            const translatedTextDisplay = document.getElementById('translatedTextDisplay'); 
+            const notificationBell = document.getElementById('notificationBell'); // أيقونة الجرس
+            const copyTranslatedTextBtn = document.getElementById('copyTranslatedTextBtn'); // زر النسخ الجديد
+            const shareBotButton = document.getElementById('shareBotButton'); // زر مشاركة البوت الجديد
 
-            while (retries < maxRetries) {
+            // إضافة فئة الحركة إلى جرس الإشعارات عند تحميل الصفحة
+            notificationBell.classList.add('notification-bell-animated');
+
+            // استدعاء دالة جلب المحاضرات الديناميكية من Firebase عند تحميل الصفحة
+            fetchLecturesFromFirestore();
+            // استدعاء دالة جلب القنوات والمجموعات الديناميكية من Firebase عند تحميل الصفحة
+            fetchChannelsAndGroupsFromFirestore();
+
+            // ربط حدث النقر لبطاقة "جدول الأسبوع"
+            const todayScheduleCard = document.getElementById('todayScheduleCard'); 
+            if (todayScheduleCard) {
+                todayScheduleCard.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                    // فتح الرابط المحدد لـ "جدول الأسبوع"
+                    window.location.href = 'https://t.me/Maktabatylastbot?start=jdwl'; 
+                });
+            }
+
+            // تأثير النقر على بطاقات الميزات الأخرى
+            featureCards.forEach(card => {
+                // تجاوز بطاقة "جدول الأسبوع" لأن لديها معالج خاص بها الآن
+                if (card.id === 'todayScheduleCard') {
+                    return; 
+                }
+
+                card.addEventListener('click', function() {
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                    const cardTitle = this.querySelector('.card-title').textContent;
+                    if (this.classList.contains('concept-explainer')) {
+                        openConceptExplainerModal();
+                    } else {
+                        showMessageBox('الوصول إلى الميزة', `تم الوصول إلى ميزة: ${cardTitle}`);
+                    }
+                });
+            });
+
+            // وظيفة لفتح مودال شرح المفاهيم (مع اتصال Gemini API)
+            async function openConceptExplainerModal() {
+                const conceptExplainerContent = `
+                    <textarea id="conceptInput" class="w-full p-3 border border-gray-300 rounded-xl mb-4 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-300" placeholder="اكتب المفهوم الذي تريد شرحه..."></textarea>
+                    <button id="explainConceptBtn" class="bg-indigo-600 text-white px-6 py-2 rounded-full cursor-pointer font-bold transition-all duration-200 hover:bg-indigo-700 active:scale-95">شرح المفهوم ✨</button>
+                    <div id="conceptResult" class="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-gray-700 text-right min-h-[50px] overflow-auto"></div>
+                `;
+                showMessageBox('شرح المفاهيم', conceptExplainerContent);
+                document.getElementById('explainConceptBtn').addEventListener('click', explainConcept);
+            }
+
+            // وظيفة لمعالجة شرح المفهوم باستخدام Gemini API
+            async function explainConcept() {
+                const conceptInput = document.getElementById('conceptInput');
+                const conceptText = conceptInput.value.trim();
+                const explainBtn = document.getElementById('explainConceptBtn');
+                const resultDisplay = document.getElementById('conceptResult');
+
+                if (!conceptText) {
+                    resultDisplay.textContent = 'الرجاء إدخال مفهوم لشرحه.';
+                    return;
+                }
+
+                explainBtn.textContent = 'جاري الشرح...';
+                explainBtn.classList.add('loading'); 
+                explainBtn.disabled = true;
+                resultDisplay.textContent = 'جاري المعالجة...'; 
+
                 try {
-                    const prompt = `Translate the following text to Arabic:\n\n${text}`;
-                    const payload = {
-                        contents: [{ parts: [{ text: prompt }] }]
-                    };
-
-                    const response = await fetch(GEMINI_API_URL, {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: `اشرح المفهوم التالي بوضوح وإيجاز باللغة العربية: "${conceptText}"` }] });
+                    
+                    const payload = { contents: chatHistory };
+                    const response = await fetch(GEMINI_API_URL, { 
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
 
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(`API Error: ${response.status} - ${JSON.stringify(errorData)}`);
+                        throw new Error(`خطأ في HTTP! الحالة: ${response.status}`);
                     }
 
                     const result = await response.json();
-                    const translatedText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (translatedText) {
-                        return translatedText;
-                    } else {
-                        throw new Error("Could not get a valid response from the API.");
+                    let explanation = "لم يتم العثور على شرح.";
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        explanation = result.candidates[0].content.parts[0].text;
                     }
+                    resultDisplay.textContent = explanation;
+
                 } catch (error) {
-                    console.error("Error during API call:", error);
-                    retries++;
-                    if (retries >= maxRetries) {
-                        console.error("Max retries reached. Giving up on API call.");
-                        throw error;
-                    }
-                    const backoffTime = Math.pow(2, retries) * 1000 + Math.random() * 1000;
-                    console.log(`Retrying in ${backoffTime}ms...`);
-                    await delay(backoffTime);
+                    console.error("خطأ في شرح المفهوم:", error);
+                    resultDisplay.textContent = 'حدث خطأ أثناء الشرح. الرجاء المحاولة مرة أخرى.';
+                } finally {
+                    explainBtn.textContent = 'شرح المفهوم ✨';
+                    explainBtn.classList.remove('loading'); 
+                    explainBtn.disabled = false;
                 }
             }
-        }
-
-        // دالة نسخ النص إلى الحافظة
-        function copyToClipboard(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-        }
-
-        // الوظائف عند تحميل الصفحة
-        window.addEventListener('load', async () => {
-            await signInAnonymously(auth); // تأمين المصادقة المجهولة عند التحميل
-            await fetchLecturesFromFirestore();
-            await fetchChannelsGroupsFromFirestore();
-        });
 
 
-        // ربط الأحداث بالأزرار
-        document.addEventListener('DOMContentLoaded', () => {
+            // وظيفة الترجمة
+            translateButton.addEventListener('click', async function() { 
+                const text = translationInput.value.trim();
+                if (!text) {
+                    showMessageBox('خطأ', 'الرجاء إدخال نص للترجمة.');
+                    return;
+                }
 
-            const notificationBell = document.getElementById('notificationBell');
-            const shareBotButton = document.getElementById('shareBotButton');
-            const translateButton = document.getElementById('translateButton');
-            const translationInput = document.querySelector('.translation-input');
-            const translatedTextDisplay = document.getElementById('translatedTextDisplay');
-            const copyTranslatedTextBtn = document.getElementById('copyTranslatedTextBtn');
-            const todayScheduleCard = document.getElementById('todayScheduleCard');
-            const conceptExplainerCard = document.querySelector('.concept-explainer');
+                this.textContent = 'جاري الترجمة...';
+                this.classList.add('loading');
+                this.disabled = true;
 
-            // حدث الضغط على زر الإشعارات
-            notificationBell.addEventListener('click', () => {
-                notificationBell.classList.remove('notification-bell-animated'); // إزالة الهزة عند الضغط
-                fetchNotificationsFromFirestore();
-            });
+                try {
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: `Translate the following English text into Arabic. Respond with ONLY the translated text, no conversational filler or extra explanations: "${text}"` }] });
+                    
+                    const payload = { contents: chatHistory };
+                    const response = await fetch(GEMINI_API_URL, { 
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
 
-            // حدث الضغط على زر مشاركة البوت
-            shareBotButton.addEventListener('click', () => {
-                showMessageBox(
-                    'شارك البوت',
-                    `<p>شارك بوت مكتبتي مع أصدقائك و زملائك في الدراسة!</p><br><p>https://t.me/Almaktbhbot</p>`
-                );
-            });
-
-            // حدث الضغط على زر "ترجم"
-            translateButton.addEventListener('click', async () => {
-                const textToTranslate = translationInput.value.trim();
-                if (textToTranslate) {
-                    try {
-                        translatedTextDisplay.textContent = 'جاري الترجمة...';
-                        const translatedText = await translateText(textToTranslate);
-                        translatedTextDisplay.textContent = translatedText;
-                    } catch (error) {
-                        translatedTextDisplay.textContent = 'حدث خطأ أثناء الترجمة. الرجاء المحاولة مرة أخرى.';
-                        console.error("Translation failed:", error);
-                    } finally {
-                        translateButton.classList.remove('loading');
-                        translateButton.innerHTML = `<i class="fas fa-language"></i> <span>ترجم للعربية</span>`;
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                } else {
-                    translatedTextDisplay.textContent = 'الرجاء إدخال نص للترجمة.';
+
+                    const result = await response.json();
+                    let translatedText = "خطأ في الترجمة";
+
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        translatedText = result.candidates[0].content.parts[0].text;
+                    } else {
+                        translatedText = "لم يتم العثور على ترجمة.";
+                    }
+                    
+                    translatedTextDisplay.textContent = translatedText; 
+                } catch (error) {
+                    console.error("خطأ في الترجمة:", error);
+                    translatedTextDisplay.textContent = 'حدث خطأ أثناء الترجمة. الرجاء المحاولة مرة أخرى.';
+                } finally {
+                    this.innerHTML = '<i class="fas fa-language"></i> <span>ترجم للعربية</span>'; // إعادة النص والأيقونة
+                    this.classList.remove('loading');
+                    this.disabled = false;
                 }
             });
 
-            // حدث الضغط على زر "نسخ الترجمة"
-            copyTranslatedTextBtn.addEventListener('click', () => {
-                const textToCopy = translatedTextDisplay.textContent;
-                if (textToCopy && textToCopy !== 'الرجاء إدخال نص للترجمة.' && textToCopy !== 'جاري الترجمة...' && textToCopy !== 'حدث خطأ أثناء الترجمة. الرجاء المحاولة مرة أخرى.') {
-                    copyToClipboard(textToCopy);
-                    showMessageBox('تم النسخ', 'تم نسخ النص المترجم إلى الحافظة بنجاح.');
-                } else {
-                    showMessageBox('لا يمكن النسخ', 'لا يوجد نص صالح للنسخ.');
+            // وظيفة النسخ إلى الحافظة
+            copyTranslatedTextBtn.addEventListener('click', function() {
+                const textToCopy = translatedTextDisplay.textContent.trim(); // إزالة المسافات البيضاء الزائدة
+
+                if (!textToCopy) { // التحقق مما إذا كان النص فارغًا
+                    showMessageBox('خطأ في النسخ', 'لا يوجد نص لنسخه.');
+                    return;
+                }
+                
+                const finalCopyText = textToCopy + " ترجمة مكتبتي @Maktabatylastbot";
+
+                // إنشاء عنصر textarea مؤقت لنسخ النص
+                const tempTextArea = document.createElement('textarea');
+                tempTextArea.value = finalCopyText;
+                document.body.appendChild(tempTextArea);
+                tempTextArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    const copyMessage = this.querySelector('.copy-message');
+                    copyMessage.classList.add('copied'); // إضافة فئة لإظهار الرسالة
+                    setTimeout(() => {
+                        copyMessage.classList.remove('copied'); // إزالة الفئة لإخفاء الرسالة
+                    }, 1500); // إخفاء الرسالة بعد 1.5 ثانية
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    showMessageBox('خطأ في النسخ', 'لم يتمكن المتصفح من نسخ النص تلقائياً. الرجاء النسخ يدوياً.');
+                } finally {
+                    document.body.removeChild(tempTextArea);
                 }
             });
-            
-            // حدث الضغط على بطاقة "جدول الأسبوع"
-            todayScheduleCard.addEventListener('click', () => {
-                showMessageBox('جدول الأسبوع', 'هذه الميزة قيد التطوير حالياً وستكون متاحة قريباً!');
+
+            // وظيفة مشاركة البوت عبر تلجرام
+            shareBotButton.addEventListener('click', function() {
+                const shareText = "جرب افضل بوت محاضرات في العالم , بوت مكتبتي @Maktabatylastbot"; // النص المراد مشاركته
+                const encodedText = encodeURIComponent(shareText);
+
+                // استخدام صيغة مشاركة النص فقط
+                const telegramShareUrl = `https://t.me/share/text?text=${encodedText}`;
+                
+                window.open(telegramShareUrl, '_blank'); // فتح الرابط في نافذة جديدة
             });
-            
-            // حدث الضغط على بطاقة "شرح المفاهيم"
-            conceptExplainerCard.addEventListener('click', () => {
-                showMessageBox('شرح المفاهيم', 'هذه الميزة قيد التطوير حالياً وستكون متاحة قريباً!');
-            });
+
+
+            // تأثير النقر على أيقونة الإشعارات (الجرس)
+            notificationBell.addEventListener('click', fetchNotificationsFromFirestore);
         });
     </script>
 </body>

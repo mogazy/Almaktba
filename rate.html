@@ -4,17 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>صفحة تقييم مكتبتي</title>
+    <!-- تضمين خط Amiri من Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <!-- تضمين Tailwind CSS لتصميم سهل وسريع -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        /* تم تحديث الخط إلى Amiri */
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Amiri', serif;
             background-color: #f3f4f6;
         }
         .container-bg {
             background-color: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1-px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         .gradient-text {
             background-image: linear-gradient(135deg, #4A00B2 0%, #8B008B 100%);
@@ -32,6 +36,19 @@
             background-image: linear-gradient(135deg, #4A00B2 0%, #8B008B 100%);
             color: white;
             border-color: #8B008B;
+        }
+        /* تصميم خاص للتعليقات المميزة */
+        .featured-review-card {
+            /* خلفية متدرجة مائلة للأبيض مع لون خفيف */
+            background-image: linear-gradient(135deg, #FFFEF2 0%, #FFFFF8 100%);
+            border-width: 2px;
+            border-style: solid;
+            /* إطار ذهبي متدرج باستخدام الألوان المحددة */
+            border-image: linear-gradient(45deg, #FFDF00, #FFC500, #FFB300) 1;
+        }
+        /* تصميم للتعليقات العادية */
+        .regular-review-card {
+            background-image: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
         }
     </style>
 </head>
@@ -234,20 +251,43 @@
             noCommentsMessage.classList.add('hidden');
             let totalRating = 0;
 
-            // Sort reviews by rating in descending order
-            allApprovedReviews.sort((a, b) => b.rating - a.rating);
+            // First, sort by isFeatured (true first), then by rating (desc)
+            allApprovedReviews.sort((a, b) => {
+                if (a.isFeatured && !b.isFeatured) return -1;
+                if (!a.isFeatured && b.isFeatured) return 1;
+                return b.rating - a.rating;
+            });
 
             // عرض عدد محدد من التعليقات
             const reviewsToDisplay = allApprovedReviews.slice(0, commentsToShow);
 
             reviewsToDisplay.forEach(item => {
                 totalRating += item.rating;
-
+                const isFeatured = item.isFeatured;
                 const reviewElement = document.createElement('div');
-                reviewElement.className = 'p-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-purple-100 to-pink-100';
+                
+                // Add conditional classes based on the isFeatured flag
+                const reviewClasses = [
+                    'p-4', 'rounded-2xl', 'shadow-md', 'transition-all',
+                    'duration-300', 'transform', 'hover:scale-105'
+                ];
+                
+                if (isFeatured) {
+                    reviewClasses.push('featured-review-card', 'shadow-xl');
+                } else {
+                    reviewClasses.push('regular-review-card');
+                }
+                
+                reviewElement.className = reviewClasses.join(' ');
                 
                 reviewElement.innerHTML = `
                     <div class="flex items-center mb-2">
+                        <!-- علامة صح دائرية تظهر فقط للتعليقات المميزة -->
+                        ${isFeatured ? `
+                        <svg class="h-6 w-6 text-blue-600 ml-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zm13.36-1.814a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clip-rule="evenodd" />
+                        </svg>
+                        ` : ''}
                         <span class="text-lg font-bold text-gray-800">${item.name}</span>
                         <div class="mr-auto text-xl font-bold gradient-text">
                             ${item.rating} / 10
@@ -282,12 +322,12 @@
             // الاستماع إلى التغييرات في مجموعة 'reviews' التي تمت الموافقة عليها فقط
             const approvedReviewsQuery = query(reviewsCollectionRef, where('approved', '==', true));
             onSnapshot(approvedReviewsQuery, (snapshot) => {
-                allApprovedReviews = snapshot.docs.map(doc => doc.data());
+                allApprovedReviews = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 commentsToShow = commentsPerPage; // إعادة تعيين عدد التعليقات المعروضة عند وجود تحديث
                 renderReviews();
                 isAppReady = true;
                 submitButton.disabled = false;
-                submitButton.textContent = 'أرسل تقييمك';
+                submitButton.textContent = 'إرسال التقييم';
                 submitButton.classList.remove('bg-gray-400');
                 submitButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
                 console.log("تم تهيئة التطبيق بنجاح. التطبيق جاهز.");
@@ -302,7 +342,7 @@
 
                 isAppReady = true;
                 submitButton.disabled = false;
-                submitButton.textContent = 'أرسل تقييمك';
+                submitButton.textContent = 'إرسال التقييم';
                 submitButton.classList.remove('bg-gray-400');
                 submitButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
             });
@@ -356,14 +396,15 @@
                 name: userName,
                 comment: comment,
                 rating: ratingValue,
-                approved: false // تم جعل القيمة الافتراضية approved: false
+                approved: false, // تم جعل القيمة الافتراضية approved: false
+                isFeatured: false // القيمة الافتراضية للتعليق الجديد هي false
             };
 
             try {
                 // إضافة المستند الجديد إلى Firestore
                 await addDoc(reviewsCollectionRef, newReview);
                 
-                showSuccessMessage("شكراً لك!", "تم إرسال تقييمك بنجاح.");
+                showSuccessMessage("شكراً لك!", "تم إرسال تقييمك بنجاح. سيظهر بعد الموافقة عليه.");
             } catch (error) {
                 console.error("خطأ أثناء إرسال التقييم:", error);
                 // Handle error message in the status div
@@ -375,7 +416,7 @@
             } finally {
                 // Reset the button to its original state
                 submitButton.disabled = false;
-                submitButton.textContent = 'أرسل تقييمك';
+                submitButton.textContent = 'إرسال التقييم';
                 submitButton.classList.remove('bg-gray-400');
                 submitButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
             }

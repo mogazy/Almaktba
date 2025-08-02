@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صفحة تقييم مكتبتي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container-bg {
+            background-color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .gradient-text {
+            background-image: linear-gradient(135deg, #4A00B2 0%, #8B008B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+        }
+        .rating-button {
+            border: 1px solid transparent;
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+        .rating-button.selected {
+            background-image: linear-gradient(135deg, #4A00B2 0%, #8B008B 100%);
+            color: white;
+            border-color: #8B008B;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-right">
+
+    <!-- Header -->
+    <header class="p-4 bg-white shadow-md flex justify-between items-center">
+        <a href="https://mogazy.github.io/Almaktba/" class="inline-block px-4 py-2 text-white bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 transition duration-300">
+            العودة للصفحة الرئيسية
+        </a>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-4 md:p-6">
+        <div class="max-w-3xl mx-auto p-4 md:p-8 rounded-xl container-bg">
+
+            <!-- New Heading Section -->
+            <div class="mb-8 text-center">
+                <h1 class="text-4xl md:text-5xl font-extrabold gradient-text">لأنك مميز</h1>
+                <h2 class="text-2xl md:text-3xl font-semibold text-gray-700 mt-2">نهتم لرأيك</h2>
+            </div>
+            
+            <!-- Current Rating Display -->
+            <div class="mb-8 text-center p-4 bg-purple-50 rounded-lg">
+                <p class="text-lg text-gray-700">تقييمنا الحالي هو:</p>
+                <div class="mt-2">
+                    <span id="averageRating" class="text-4xl font-bold gradient-text">--</span>
+                    <span class="text-xl font-bold gradient-text"> / 10</span>
+                </div>
+            </div>
+
+            <!-- Review Form -->
+            <div class="mb-10 p-4 md:p-6 border border-gray-200 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">قيّم موقعنا</h2>
+                <form id="reviewForm" class="space-y-4">
+                    <div>
+                        <label for="userName" class="block text-sm font-medium text-gray-700">اسمك:</label>
+                        <input type="text" id="userName" name="userName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 p-2">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">تقييمك:</label>
+                        <div id="ratingButtons" class="grid grid-cols-5 md:grid-cols-10 gap-2">
+                            <!-- Rating buttons will be inserted here -->
+                        </div>
+                        <input type="hidden" id="rating" name="rating" required>
+                    </div>
+
+                    <div>
+                        <label for="comment" class="block text-sm font-medium text-gray-700">تعليقك (اختياري):</label>
+                        <textarea id="comment" name="comment" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 p-2"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-2 px-4 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transition duration-300">
+                        أرسل تقييمك
+                    </button>
+                </form>
+            </div>
+
+            <!-- Thank you Message Modal -->
+            <div id="thankYouModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4">
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm w-full">
+                    <!-- Updated message as requested by the user -->
+                    <h3 class="text-2xl font-bold text-green-600">شكراً لك!</h3>
+                    <p class="mt-2 text-lg text-gray-700">شكراً على التقييم.</p>
+                    <button id="closeModal" class="mt-4 py-2 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-300">إغلاق</button>
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div>
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">تعليقات المستخدمين</h2>
+                <div id="commentsContainer" class="space-y-4">
+                    <p id="noCommentsMessage" class="text-gray-500 text-center hidden">لا توجد تعليقات بعد. كن أول من يكتب تعليقًا!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer is no longer needed as the new heading serves the purpose -->
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables for Firebase configuration
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // UI Elements
+        const reviewForm = document.getElementById('reviewForm');
+        const userNameInput = document.getElementById('userName');
+        const ratingButtonsContainer = document.getElementById('ratingButtons');
+        const ratingInput = document.getElementById('rating');
+        const commentInput = document.getElementById('comment');
+        const averageRatingSpan = document.getElementById('averageRating');
+        const commentsContainer = document.getElementById('commentsContainer');
+        const noCommentsMessage = document.getElementById('noCommentsMessage');
+        const thankYouModal = document.getElementById('thankYouModal');
+        const closeModalButton = document.getElementById('closeModal');
+
+        // State for the selected rating
+        let selectedRating = null;
+
+        // Generate rating buttons dynamically
+        for (let i = 1; i <= 10; i++) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = i;
+            button.setAttribute('data-rating', i);
+            button.className = 'rating-button flex items-center justify-center h-10 w-10 md:h-12 md:w-12 rounded-full font-bold text-lg hover:bg-gray-300 transition duration-150';
+            ratingButtonsContainer.appendChild(button);
+        }
+
+        // Add event listener to the rating buttons container
+        ratingButtonsContainer.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.matches('.rating-button')) {
+                // Remove 'selected' class from all buttons
+                ratingButtonsContainer.querySelectorAll('.rating-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+                // Add 'selected' class to the clicked button
+                target.classList.add('selected');
+                // Store the selected rating
+                selectedRating = parseInt(target.getAttribute('data-rating'), 10);
+                ratingInput.value = selectedRating;
+            }
+        });
+
+        // Function to render comments
+        function renderComments(comments) {
+            commentsContainer.innerHTML = ''; // Clear existing comments
+            if (comments.length === 0) {
+                noCommentsMessage.classList.remove('hidden');
+                return;
+            }
+            noCommentsMessage.classList.add('hidden');
+            
+            comments.forEach(comment => {
+                const commentElement = document.createElement('div');
+                commentElement.className = "bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm";
+                commentElement.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="font-bold gradient-text">${comment.name}</p>
+                        <p class="text-sm text-gray-500">تقييم: <span class="gradient-text font-bold">${comment.rating}</span>/10</p>
+                    </div>
+                    <p class="text-gray-700">${comment.comment}</p>
+                `;
+                commentsContainer.appendChild(commentElement);
+            });
+        }
+
+        // Function to calculate and display the average rating from APPROVED reviews
+        function calculateAverageRating(reviews) {
+            const approvedReviews = reviews.filter(review => review.approved);
+            if (approvedReviews.length === 0) {
+                averageRatingSpan.textContent = '--';
+                return;
+            }
+            const totalRating = approvedReviews.reduce((sum, review) => sum + review.rating, 0);
+            const average = totalRating / approvedReviews.length;
+            averageRatingSpan.textContent = average.toFixed(1);
+        }
+        
+        // Listen for authentication state changes and initialize app
+        async function initApp() {
+            if (initialAuthToken) {
+                await signInWithCustomToken(auth, initialAuthToken);
+            } else {
+                await signInAnonymously(auth);
+            }
+
+            // Collection reference in Firestore where reviews will be stored
+            const reviewsCollection = collection(db, `artifacts/${appId}/public/data/reviews`);
+
+            // Use onSnapshot to get real-time updates for ratings and comments
+            onSnapshot(reviewsCollection, (snapshot) => {
+                const allReviews = [];
+                snapshot.forEach(doc => {
+                    allReviews.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Filter for approved comments to display
+                const approvedComments = allReviews.filter(review => review.approved);
+                renderComments(approvedComments);
+                
+                // Calculate and display average rating for APPROVED reviews only
+                calculateAverageRating(allReviews);
+            }, (error) => {
+                console.error("Error fetching documents: ", error);
+            });
+        }
+        
+        // Handle form submission
+        reviewForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userName = userNameInput.value.trim();
+            const comment = commentInput.value.trim();
+
+            if (!userName) {
+                // Using console.error instead of alert as per instructions
+                console.error("User name is required.");
+                return;
+            }
+            
+            if (selectedRating === null) {
+                // A custom message box would be used here instead of alert
+                alert("يرجى اختيار تقييم من 1 إلى 10.");
+                return;
+            }
+
+            try {
+                // Use the user's name as the document ID to allow updating their review
+                const reviewDocRef = doc(db, `artifacts/${appId}/public/data/reviews`, userName);
+                await setDoc(reviewDocRef, {
+                    name: userName,
+                    rating: selectedRating,
+                    comment: comment,
+                    timestamp: new Date(),
+                    approved: false // Comments are not approved by default
+                });
+                
+                // Display thank you message modal
+                thankYouModal.classList.remove('hidden');
+                thankYouModal.classList.add('flex');
+
+                // Reset form
+                reviewForm.reset();
+                selectedRating = null;
+                ratingInput.value = '';
+                ratingButtonsContainer.querySelectorAll('.rating-button').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+            } catch (error) {
+                console.error("Error writing document: ", error);
+            }
+        });
+
+        // Close thank you modal
+        closeModalButton.addEventListener('click', () => {
+            thankYouModal.classList.add('hidden');
+            thankYouModal.classList.remove('flex');
+        });
+        
+        // Ensure the app initializes after the page loads
+        window.addEventListener('load', initApp);
+    </script>
+</body>
+</html>

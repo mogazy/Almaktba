@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>صفحة تقييم مكتبتي</title>
+    <!-- تضمين Tailwind CSS لتصميم سهل وسريع -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap');
@@ -13,7 +14,7 @@
         }
         .container-bg {
             background-color: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1-px rgba(0, 0, 0, 0.06);
         }
         .gradient-text {
             background-image: linear-gradient(135deg, #4A00B2 0%, #8B008B 100%);
@@ -37,15 +38,25 @@
 <body class="flex flex-col min-h-screen text-right">
 
     <!-- Header -->
-    <header class="p-4 bg-white shadow-md flex justify-between items-center">
-        <a href="https://mogazy.github.io/Almaktba/" class="inline-block px-4 py-2 text-white bg-purple-600 rounded-lg shadow-md hover:bg-purple-700 transition duration-300">
-            العودة للصفحة الرئيسية
+    <header class="p-4 bg-purple-900 text-white rounded-b-xl shadow-md">
+        <a href="https://mogazy.github.io/Almaktba/" class="flex justify-between items-center w-full h-full">
+            <span class="text-2xl font-bold">مكتبتي</span>
+            <span class="inline-block px-4 py-2 text-white bg-purple-500 rounded-lg shadow-md hover:bg-purple-600 transition duration-300">
+                العودة للصفحة الرئيسية
+            </span>
         </a>
     </header>
 
     <!-- Main Content -->
     <main class="flex-grow p-4 md:p-6">
         <div class="max-w-3xl mx-auto p-4 md:p-8 rounded-xl container-bg">
+            
+            <!-- Success/Error Message (New element, replacing the modal) -->
+            <div id="statusMessage" class="hidden text-center p-6 mb-8 bg-green-100 text-green-800 rounded-lg shadow-md">
+                <h3 id="messageTitle" class="text-2xl font-bold"></h3>
+                <p id="messageText" class="mt-2 text-lg"></p>
+                <button id="resetFormButton" class="mt-4 py-2 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-300">تم</button>
+            </div>
 
             <!-- New Heading Section -->
             <div class="mb-8 text-center">
@@ -63,25 +74,29 @@
             </div>
 
             <!-- Review Form -->
-            <div class="mb-10 p-4 md:p-6 border border-gray-200 rounded-lg">
+            <div id="reviewFormContainer" class="mb-10 p-4 md:p-6 border border-gray-200 rounded-lg">
                 <h2 class="text-xl font-semibold mb-4 text-gray-800">قيّم موقعنا</h2>
                 <form id="reviewForm" class="space-y-4">
                     <div>
-                        <label for="userName" class="block text-sm font-medium text-gray-700">اسمك:</label>
-                        <input type="text" id="userName" name="userName" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 p-2">
+                        <!-- تم تكبير النص -->
+                        <label for="userName" class="block text-lg font-medium text-gray-700">اسمك:</label>
+                        <input type="text" id="userName" name="userName" required class="mt-1 block w-full rounded-md border-gray-500 shadow-md focus:border-purple-500 focus:ring-purple-500 p-2">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">تقييمك:</label>
+                        <!-- تم تكبير النص -->
+                        <label class="block text-lg font-medium text-gray-700 mb-2">تقييمك:</label>
                         <div id="ratingButtons" class="grid grid-cols-5 md:grid-cols-10 gap-2">
-                            <!-- Rating buttons will be inserted here -->
+                            <!-- سيتم إضافة أزرار التقييم هنا بواسطة JavaScript -->
                         </div>
                         <input type="hidden" id="rating" name="rating" required>
                     </div>
 
                     <div>
-                        <label for="comment" class="block text-sm font-medium text-gray-700">تعليقك (اختياري):</label>
-                        <textarea id="comment" name="comment" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 p-2"></textarea>
+                        <!-- تم تكبير النص -->
+                        <label for="comment" class="block text-lg font-medium text-gray-700">تعليقك (اختياري):</label>
+                        <!-- تم تصغير عدد الأسطر لحجم طبيعي أكثر -->
+                        <textarea id="comment" name="comment" rows="4" class="mt-1 block w-full rounded-md border-gray-500 shadow-md focus:border-purple-500 focus:ring-purple-500 p-2"></textarea>
                     </div>
                     <button type="submit" id="submitButton" disabled class="w-full py-2 px-4 bg-gray-400 text-white font-semibold rounded-lg shadow-md transition duration-300">
                         جاري التحميل...
@@ -89,43 +104,49 @@
                 </form>
             </div>
 
-            <!-- Thank you/Error Message Modal -->
-            <div id="modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4">
-                <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm w-full">
-                    <h3 id="modalTitle" class="text-2xl font-bold text-green-600"></h3>
-                    <p id="modalMessage" class="mt-2 text-lg text-gray-700"></p>
-                    <button id="closeModal" class="mt-4 py-2 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-300">إغلاق</button>
-                </div>
-            </div>
-
             <!-- Comments Section -->
             <div>
-                <h2 class="text-2xl font-bold mb-4 text-gray-800">تعليقات المستخدمين</h2>
+                <h2 class="text-2xl font-bold mb-4 text-gray-800">التقييمات</h2>
                 <div id="commentsContainer" class="space-y-4">
-                    <p id="noCommentsMessage" class="text-gray-500 text-center hidden">لا توجد تعليقات بعد. كن أول من يكتب تعليقًا!</p>
+                    <p id="noCommentsMessage" class="text-gray-500 text-center">لا توجد تقييمات معروضة حاليًا.</p>
+                </div>
+                <!-- زر عرض المزيد -->
+                <div class="mt-8 text-center" id="loadMoreButtonContainer">
+                    <!-- تم إضافة أيقونة التحميل -->
+                    <button id="loadMoreButton" class="hidden flex items-center justify-center mx-auto py-2 px-6 bg-purple-500 text-white font-semibold rounded-lg shadow-md hover:bg-purple-600 transition duration-300">
+                        <svg id="loadMoreSpinner" class="hidden animate-spin h-5 w-5 mr-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span id="loadMoreText">عرض المزيد</span>
+                    </button>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Firebase SDKs -->
+    <!-- تضمين مكتبات Firebase اللازمة -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, addDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // Global variables for Firebase configuration and services
-        // تم استخدام متغيرات البيئة التي توفرها المنصة لضمان التكوين الصحيح للمشروع
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        // تهيئة مشروع Firebase الخاص بك
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWxQCNU-91cK2FwiL3zs1_bKO6LtJHTz4",
+            authDomain: "rate-f04e2.firebaseapp.com",
+            projectId: "rate-f04e2",
+            storageBucket: "rate-f04e2.firebase-app.com",
+            messagingSenderId: "236207388801",
+            appId: "1:236207388801:web:2274a016a6d2a5dee8f580",
+            measurementId: "G-WM812E8GPQ"
+        };
 
-        let app;
-        let db;
-        let auth;
-        let reviewsCollection;
-        let isFirebaseReady = false;
+        // تهيئة Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
         // UI Elements
+        const reviewFormContainer = document.getElementById('reviewFormContainer');
         const reviewForm = document.getElementById('reviewForm');
         const submitButton = document.getElementById('submitButton');
         const userNameInput = document.getElementById('userName');
@@ -135,21 +156,44 @@
         const averageRatingSpan = document.getElementById('averageRating');
         const commentsContainer = document.getElementById('commentsContainer');
         const noCommentsMessage = document.getElementById('noCommentsMessage');
-        const modal = document.getElementById('modal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalMessage = document.getElementById('modalMessage');
-        const closeModalButton = document.getElementById('closeModal');
+        const statusMessageDiv = document.getElementById('statusMessage');
+        const messageTitle = document.getElementById('messageTitle');
+        const messageText = document.getElementById('messageText');
+        const resetFormButton = document.getElementById('resetFormButton');
+        const loadMoreButton = document.getElementById('loadMoreButton');
+        const loadMoreText = document.getElementById('loadMoreText');
+        const loadMoreSpinner = document.getElementById('loadMoreSpinner');
 
-        // Function to show a custom modal with a title and message
-        function showModal(title, message, isError = false) {
-            modalTitle.textContent = title;
-            modalMessage.textContent = message;
-            modalTitle.classList.toggle('text-green-600', !isError);
-            modalTitle.classList.toggle('text-red-600', isError);
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+        // مرجع لمجموعة 'reviews' في Firestore
+        const reviewsCollectionRef = collection(db, 'reviews');
+
+        // متغير لتتبع حالة جاهزية التطبيق
+        let isAppReady = false;
+
+        // متغيرات للتحكم في عدد التعليقات المعروضة
+        const commentsPerPage = 10;
+        let commentsToShow = commentsPerPage;
+        let allApprovedReviews = []; // لتخزين جميع التقييمات المعتمدة
+
+        // Function to show a success message
+        function showSuccessMessage(title, message) {
+            messageTitle.textContent = title;
+            messageText.textContent = message;
+            statusMessageDiv.classList.remove('hidden');
+            reviewFormContainer.classList.add('hidden');
         }
 
+        // Function to hide the message and show the form again
+        function resetForm() {
+            statusMessageDiv.classList.add('hidden');
+            reviewFormContainer.classList.remove('hidden');
+            reviewForm.reset();
+            ratingInput.value = '';
+            ratingButtonsContainer.querySelectorAll('.rating-button').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+        }
+        
         // Generate rating buttons dynamically
         for (let i = 1; i <= 10; i++) {
             const button = document.createElement('button');
@@ -176,104 +220,105 @@
             }
         });
 
-        // Function to render comments
-        function renderComments(comments) {
-            commentsContainer.innerHTML = ''; // Clear existing comments
-            if (comments.length === 0) {
-                noCommentsMessage.classList.remove('hidden');
-                return;
-            }
-            noCommentsMessage.classList.add('hidden');
+        // Function to display comments and calculate average rating
+        function renderReviews() {
+            commentsContainer.innerHTML = '';
             
-            comments.forEach(comment => {
-                const commentElement = document.createElement('div');
-                commentElement.className = "bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm";
-                commentElement.innerHTML = `
-                    <div class="flex justify-between items-center mb-2">
-                        <p class="font-bold gradient-text">${comment.name}</p>
-                        <p class="text-sm text-gray-500">تقييم: <span class="font-bold gradient-text">${comment.rating}</span>/10</p>
-                    </div>
-                    <p class="text-gray-700">${comment.comment}</p>
-                `;
-                commentsContainer.appendChild(commentElement);
-            });
-        }
-
-        // Function to calculate and display the average rating from APPROVED reviews
-        function calculateAverageRating(reviews) {
-            const approvedReviews = reviews.filter(review => review.approved);
-            if (approvedReviews.length === 0) {
+            if (allApprovedReviews.length === 0) {
+                noCommentsMessage.classList.remove('hidden');
                 averageRatingSpan.textContent = '--';
+                loadMoreButton.classList.add('hidden');
                 return;
             }
-            const totalRating = approvedReviews.reduce((sum, review) => sum + review.rating, 0);
-            const average = totalRating / approvedReviews.length;
-            averageRatingSpan.textContent = average.toFixed(1);
+
+            noCommentsMessage.classList.add('hidden');
+            let totalRating = 0;
+
+            // Sort reviews by rating in descending order
+            allApprovedReviews.sort((a, b) => b.rating - a.rating);
+
+            // عرض عدد محدد من التعليقات
+            const reviewsToDisplay = allApprovedReviews.slice(0, commentsToShow);
+
+            reviewsToDisplay.forEach(item => {
+                totalRating += item.rating;
+
+                const reviewElement = document.createElement('div');
+                reviewElement.className = 'p-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 bg-gradient-to-br from-purple-100 to-pink-100';
+                
+                reviewElement.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <span class="text-lg font-bold text-gray-800">${item.name}</span>
+                        <div class="mr-auto text-xl font-bold gradient-text">
+                            ${item.rating} / 10
+                        </div>
+                    </div>
+                    <div>
+                        <!-- تم تكبير نص التعليق هنا -->
+                        <p class="text-base text-gray-700">${item.comment}</p>
+                    </div>
+                `;
+                
+                commentsContainer.appendChild(reviewElement);
+            });
+
+            // Calculate and display average rating
+            const averageRating = (totalRating / allApprovedReviews.length).toFixed(1);
+            averageRatingSpan.textContent = averageRating;
+
+            // Show or hide the "Load More" button and reset its state
+            if (allApprovedReviews.length > commentsToShow) {
+                loadMoreButton.classList.remove('hidden');
+                loadMoreButton.disabled = false;
+                loadMoreText.textContent = 'عرض المزيد';
+                loadMoreSpinner.classList.add('hidden');
+            } else {
+                loadMoreButton.classList.add('hidden');
+            }
         }
         
-        // Listen for authentication state changes and initialize app
+        // Main initialization function
         async function initApp() {
-            try {
-                // Initialize Firebase with the provided configuration
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                
-                // Use anonymous sign-in to handle authentication without user credentials
-                await signInAnonymously(auth);
-
-                reviewsCollection = collection(db, `artifacts/${appId}/public/data/reviews`);
-
-                // Start listening to the collection immediately after setup
-                onSnapshot(reviewsCollection, (snapshot) => {
-                    const allReviews = [];
-                    snapshot.forEach(doc => {
-                        allReviews.push({ id: doc.id, ...doc.data() });
-                    });
-
-                    // Filter for approved comments to display
-                    const approvedComments = allReviews.filter(review => review.approved);
-                    renderComments(approvedComments);
-                    
-                    // Calculate and display average rating for APPROVED reviews only
-                    calculateAverageRating(allReviews);
-                }, (error) => {
-                    console.error("خطأ في جلب المستندات من Firestore:", error);
-                });
-
-                isFirebaseReady = true;
+            // الاستماع إلى التغييرات في مجموعة 'reviews' التي تمت الموافقة عليها فقط
+            const approvedReviewsQuery = query(reviewsCollectionRef, where('approved', '==', true));
+            onSnapshot(approvedReviewsQuery, (snapshot) => {
+                allApprovedReviews = snapshot.docs.map(doc => doc.data());
+                commentsToShow = commentsPerPage; // إعادة تعيين عدد التعليقات المعروضة عند وجود تحديث
+                renderReviews();
+                isAppReady = true;
                 submitButton.disabled = false;
                 submitButton.textContent = 'أرسل تقييمك';
                 submitButton.classList.remove('bg-gray-400');
                 submitButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
+                console.log("تم تهيئة التطبيق بنجاح. التطبيق جاهز.");
+            }, (error) => {
+                console.error("خطأ في جلب البيانات:", error);
+                // Handle error without a modal
+                messageTitle.textContent = "خطأ في الاتصال";
+                messageText.textContent = "فشل جلب التقييمات. يرجى التحقق من اتصالك.";
+                statusMessageDiv.classList.remove('bg-green-100', 'text-green-800');
+                statusMessageDiv.classList.add('bg-red-100', 'text-red-800');
+                statusMessageDiv.classList.remove('hidden');
 
-                console.log("تم تهيئة Firebase بنجاح. التطبيق جاهز.");
-            } catch (error) {
-                console.error("خطأ في تهيئة Firebase:", error);
-                showModal("خطأ!", "فشل في تحميل التطبيق. يرجى المحاولة لاحقاً.", true);
-            }
+                isAppReady = true;
+                submitButton.disabled = false;
+                submitButton.textContent = 'أرسل تقييمك';
+                submitButton.classList.remove('bg-gray-400');
+                submitButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
+            });
         }
         
         // Handle form submission
         reviewForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            console.log("بدء عملية إرسال النموذج...");
-
-            // Show a loading state for the button
-            submitButton.disabled = true;
-            submitButton.textContent = 'جاري الإرسال...';
-            submitButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
-            submitButton.classList.add('bg-gray-400');
-            
-            if (!isFirebaseReady) {
-                showModal("خطأ!", "التطبيق غير جاهز. يرجى الانتظار.", true);
-                console.error("محاولة إرسال النموذج قبل تهيئة Firebase.");
-                // Reset the button state and return
-                submitButton.disabled = false;
-                submitButton.textContent = 'أرسل تقييمك';
-                submitButton.classList.remove('bg-gray-400');
-                submitButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
+            if (!isAppReady) {
+                // Show a message instead of a modal
+                messageTitle.textContent = "خطأ!";
+                messageText.textContent = "التطبيق غير جاهز. يرجى الانتظار.";
+                statusMessageDiv.classList.remove('bg-green-100', 'text-green-800');
+                statusMessageDiv.classList.add('bg-red-100', 'text-red-800');
+                statusMessageDiv.classList.remove('hidden');
                 return;
             }
 
@@ -282,72 +327,77 @@
             const ratingValue = parseInt(ratingInput.value, 10);
 
             if (!userName) {
-                showModal("خطأ في الإدخال", "يرجى إدخال اسمك.", true);
-                console.error("الاسم غير موجود.");
-                // Reset the button state and return
-                submitButton.disabled = false;
-                submitButton.textContent = 'أرسل تقييمك';
-                submitButton.classList.remove('bg-gray-400');
-                submitButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
+                // Show a message instead of a modal
+                messageTitle.textContent = "خطأ في الإدخال";
+                messageText.textContent = "يرجى إدخال اسمك.";
+                statusMessageDiv.classList.remove('bg-green-100', 'text-green-800');
+                statusMessageDiv.classList.add('bg-red-100', 'text-red-800');
+                statusMessageDiv.classList.remove('hidden');
                 return;
             }
             
-            if (isNaN(ratingValue)) {
-                showModal("خطأ في الإدخال", "يرجى اختيار تقييم من 1 إلى 10.", true);
-                console.error("التقييم غير موجود أو غير صالح.");
-                // Reset the button state and return
-                submitButton.disabled = false;
-                submitButton.textContent = 'أرسل تقييمك';
-                submitButton.classList.remove('bg-gray-400');
-                submitButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
+            if (isNaN(ratingValue) || ratingValue < 1 || ratingValue > 10) {
+                // Show a message instead of a modal
+                messageTitle.textContent = "خطأ في الإدخال";
+                messageText.textContent = "يرجى اختيار تقييم من 1 إلى 10.";
+                statusMessageDiv.classList.remove('bg-green-100', 'text-green-800');
+                statusMessageDiv.classList.add('bg-red-100', 'text-red-800');
+                statusMessageDiv.classList.remove('hidden');
                 return;
             }
 
-            // A new log message to verify the data before sending
-            console.log("البيانات التي سيتم إرسالها إلى Firestore:", {
+            // Show a loading state for the button
+            submitButton.disabled = true;
+            submitButton.textContent = 'جاري الإرسال...';
+            submitButton.classList.remove('bg-purple-600', 'hover:bg-purple-700');
+            submitButton.classList.add('bg-gray-400');
+            
+            const newReview = {
                 name: userName,
-                rating: ratingValue,
                 comment: comment,
-                approved: false
-            });
+                rating: ratingValue,
+                approved: false // تم جعل القيمة الافتراضية approved: false
+            };
 
             try {
-                // Use addDoc to automatically generate a unique ID for the document
-                await addDoc(reviewsCollection, {
-                    name: userName,
-                    rating: ratingValue,
-                    comment: comment,
-                    approved: false // Comments are not approved by default
-                });
+                // إضافة المستند الجديد إلى Firestore
+                await addDoc(reviewsCollectionRef, newReview);
                 
-                console.log("تم إرسال البيانات بنجاح.");
-                // Display thank you message modal
-                showModal("شكراً لك!", "شكراً على التقييم.", false);
-
-                // Reset form only after successful submission
-                reviewForm.reset();
-                ratingInput.value = ''; // Reset the hidden input value
-                ratingButtonsContainer.querySelectorAll('.rating-button').forEach(btn => {
-                    btn.classList.remove('selected');
-                });
+                showSuccessMessage("شكراً لك!", "تم إرسال تقييمك بنجاح.");
             } catch (error) {
-                console.error("خطأ أثناء كتابة المستند إلى Firestore:", error);
-                showModal("خطأ!", "حدث خطأ أثناء إرسال التقييم. يرجى المحاولة لاحقاً.", true);
+                console.error("خطأ أثناء إرسال التقييم:", error);
+                // Handle error message in the status div
+                messageTitle.textContent = "خطأ!";
+                messageText.textContent = "حدث خطأ أثناء إرسال التقييم. يرجى المحاولة لاحقاً.";
+                statusMessageDiv.classList.remove('bg-green-100', 'text-green-800');
+                statusMessageDiv.classList.add('bg-red-100', 'text-red-800');
+                statusMessageDiv.classList.remove('hidden');
             } finally {
                 // Reset the button to its original state
                 submitButton.disabled = false;
                 submitButton.textContent = 'أرسل تقييمك';
                 submitButton.classList.remove('bg-gray-400');
                 submitButton.classList.add('bg-purple-600', 'hover:bg-purple-700');
-                console.log("تم إنهاء عملية إرسال النموذج.");
             }
         });
 
-        // Close modal
-        closeModalButton.addEventListener('click', () => {
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+        // Add event listener to the "Load More" button
+        loadMoreButton.addEventListener('click', () => {
+            // Display loading state
+            loadMoreButton.disabled = true;
+            loadMoreText.textContent = 'جاري التحميل...';
+            loadMoreSpinner.classList.remove('hidden');
+
+            // Simulate a delay before rendering new comments
+            // Note: In a real-world scenario, you would fetch more data from Firestore here.
+            setTimeout(() => {
+                commentsToShow += commentsPerPage;
+                renderReviews();
+            }, 500); // 500ms delay
         });
+
+        // Add event listener to the reset button
+        resetFormButton.addEventListener('click', resetForm);
         
         // Ensure the app initializes after the page loads
         window.addEventListener('load', initApp);

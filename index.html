@@ -394,6 +394,17 @@
             color: #777; /* لون رمادي لتفاصيل المحاضرة */
         }
 
+        /* تحريك جرس الإشعارات لجذب الانتباه */
+        @keyframes pulse-notification {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .notification-bell-animated {
+            animation: pulse-notification 0.3s ease-in-out 0s 10; /* يهتز 10 مرات في 3 ثوانٍ */
+        }
+
         /* أنماط الصفوف الفردية والزوجية للمحاضرات */
         .lecture-item:nth-child(odd) {
             background-color: #F0F5F9; /* لون رمادي مزرق فاتح جداً للصفوف الفردية */
@@ -454,30 +465,6 @@
     transform: translateY(-2px); /* رفع الزر قليلاً */
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
   }
-        .rate-us-btn {
-    background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%); /* تدرج لوني ذهبي إلى برتقالي */
-    color: white;
-    padding: 8px 16px;
-    border-radius: 8px; /* زوايا مستديرة */
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px; /* مسافة بين الأيقونة والنص */
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4); /* ظل خفيف جذاب */
-}
-
-.rate-us-btn:hover {
-    transform: translateY(-2px); /* رفع الزر قليلاً عند التحويم */
-    box-shadow: 0 4px 10px rgba(255, 215, 0, 0.6);
-}
-
-.rate-us-btn:active {
-    transform: translateY(0); /* إعادة الزر إلى مكانه عند الضغط */
-    box-shadow: 0 2px 5px rgba(255, 215, 0, 0.4);
-}
     </style>
 </head>
 <body class="font-inter min-h-screen overflow-x:hidden">
@@ -493,10 +480,39 @@
             <!-- زر البحث تمت إزالته سابقاً -->
             
             <!-- أيقونة الإشعارات في أقصى اليسار -->
-            <div class="flex gap-3 items-center">
-                <a href="https://mogazy.github.io/Almaktba/rate.html" class="rate-us-btn">قسمنا</a>
-
+            <div class="jrs">
+                <svg id="notificationBell" class="header-icon w-7 h-7 cursor-pointer transition-all duration-200 hover:scale-105 relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                </svg>
             </div>
+            <div class="flex gap-3 items-center">
+  <a href="https://mogazy.github.io/Almaktba/rate.html" class="rate-us-btn">قيم البوت</a>
+</div>
+<style>
+
+.jrs {
+  visibility: hidden;
+}
+  
+  .rate-us-btn {
+  background: linear-gradient(135deg, #FFD700 0%, #FF8C00 100%);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.4);
+}
+
+.rate-us-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.6);
+}
+
+</style>
         </header>
 
     

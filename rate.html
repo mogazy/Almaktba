@@ -89,12 +89,11 @@
                 </form>
             </div>
 
-            <!-- Thank you Message Modal -->
-            <div id="thankYouModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4">
+            <!-- Thank you/Error Message Modal -->
+            <div id="modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4">
                 <div class="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm w-full">
-                    <!-- Updated message as requested by the user -->
-                    <h3 class="text-2xl font-bold text-green-600">شكراً لك!</h3>
-                    <p class="mt-2 text-lg text-gray-700">شكراً على التقييم.</p>
+                    <h3 id="modalTitle" class="text-2xl font-bold text-green-600"></h3>
+                    <p id="modalMessage" class="mt-2 text-lg text-gray-700"></p>
                     <button id="closeModal" class="mt-4 py-2 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition duration-300">إغلاق</button>
                 </div>
             </div>
@@ -109,13 +108,11 @@
         </div>
     </main>
 
-    <!-- Footer is no longer needed as the new heading serves the purpose -->
-
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, addDoc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global variables for Firebase configuration
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -136,11 +133,23 @@
         const averageRatingSpan = document.getElementById('averageRating');
         const commentsContainer = document.getElementById('commentsContainer');
         const noCommentsMessage = document.getElementById('noCommentsMessage');
-        const thankYouModal = document.getElementById('thankYouModal');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
         const closeModalButton = document.getElementById('closeModal');
 
         // State for the selected rating
         let selectedRating = null;
+
+        // Function to show a custom modal with a title and message
+        function showModal(title, message, isError = false) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalTitle.classList.toggle('text-green-600', !isError);
+            modalTitle.classList.toggle('text-red-600', isError);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
 
         // Generate rating buttons dynamically
         for (let i = 1; i <= 10; i++) {
@@ -183,7 +192,7 @@
                 commentElement.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <p class="font-bold gradient-text">${comment.name}</p>
-                        <p class="text-sm text-gray-500">تقييم: <span class="gradient-text font-bold">${comment.rating}</span>/10</p>
+                        <p class="text-sm text-gray-500">تقييم: <span class="font-bold gradient-text">${comment.rating}</span>/10</p>
                     </div>
                     <p class="text-gray-700">${comment.comment}</p>
                 `;
@@ -240,21 +249,19 @@
             const comment = commentInput.value.trim();
 
             if (!userName) {
-                // Using console.error instead of alert as per instructions
-                console.error("User name is required.");
+                showModal("خطأ في الإدخال", "يرجى إدخال اسمك.", true);
                 return;
             }
             
             if (selectedRating === null) {
-                // A custom message box would be used here instead of alert
-                alert("يرجى اختيار تقييم من 1 إلى 10.");
+                showModal("خطأ في الإدخال", "يرجى اختيار تقييم من 1 إلى 10.", true);
                 return;
             }
 
             try {
-                // Use the user's name as the document ID to allow updating their review
-                const reviewDocRef = doc(db, `artifacts/${appId}/public/data/reviews`, userName);
-                await setDoc(reviewDocRef, {
+                // Use addDoc to automatically generate a unique ID for the document
+                const reviewsCollection = collection(db, `artifacts/${appId}/public/data/reviews`);
+                await addDoc(reviewsCollection, {
                     name: userName,
                     rating: selectedRating,
                     comment: comment,
@@ -263,10 +270,9 @@
                 });
                 
                 // Display thank you message modal
-                thankYouModal.classList.remove('hidden');
-                thankYouModal.classList.add('flex');
+                showModal("شكراً لك!", "شكراً على التقييم.", false);
 
-                // Reset form
+                // Reset form only after successful submission
                 reviewForm.reset();
                 selectedRating = null;
                 ratingInput.value = '';
@@ -275,13 +281,14 @@
                 });
             } catch (error) {
                 console.error("Error writing document: ", error);
+                showModal("خطأ!", "حدث خطأ أثناء إرسال التقييم.", true);
             }
         });
 
-        // Close thank you modal
+        // Close modal
         closeModalButton.addEventListener('click', () => {
-            thankYouModal.classList.add('hidden');
-            thankYouModal.classList.remove('flex');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         });
         
         // Ensure the app initializes after the page loads

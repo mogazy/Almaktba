@@ -443,6 +443,35 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 188, 212, 0.6);
         }
+             
+
+  
+  .button-container {
+    padding: 20px;
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .red-button {
+    display: inline-block;
+    padding: 15px 30px;
+    text-decoration: none;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #FF6347, #FF4500); /* تدرج لوني أحمر غامق وفاتح */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .red-button:hover {
+    background: linear-gradient(135deg, #FF4500, #FF6347); /* تأثير الهوفر: عكس التدرج */
+    transform: translateY(-2px); /* رفع الزر قليلاً */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+  }
     </style>
 </head>
 <body class="font-inter min-h-screen overflow-x:hidden">
@@ -472,6 +501,19 @@
                 <i class="fas fa-paper-plane"></i>
                 <span>شارك البوت</span>
             </button>
+
+
+
+
+
+<div class="button-container">
+  <a href="https://mogazy.github.io/Almaktba/blood.html" class="red-button">
+    دليل التحليل
+  </a>
+</div>
+
+
+
 
             <div class="recent-lectures-section mb-6 rounded-2xl p-5 shadow-lg">
                 <h2 class="section-title text-2xl font-bold pb-4 mb-5 text-right border-b">المحاضرات المتوفرة</h2>

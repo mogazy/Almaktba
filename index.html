@@ -443,29 +443,22 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 188, 212, 0.6);
         }
+          .red-button{
+            background: linear-gradient(135deg, #FF6347, #FF4500); 
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px; /* زوايا مستديرة */
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px; /* مسافة تحت الزر */
+        }
              
-
-  
-  .button-container {
-    padding: 20px;
-    background-color: white;
-    border-radius: 15px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  .red-button {
-    display: inline-block;
-    padding: 15px 30px;
-    text-decoration: none;
-    color: white;
-    font-size: 18px;
-    font-weight: bold;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #FF6347, #FF4500); /* تدرج لوني أحمر غامق وفاتح */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    text-align: center;
-  }
 
   .red-button:hover {
     background: linear-gradient(135deg, #FF4500, #FF6347); /* تأثير الهوفر: عكس التدرج */
@@ -506,7 +499,7 @@
 
 
 
-<div class="button-container">
+<div>
   <a href="https://mogazy.github.io/Almaktba/blood.html" class="red-button">
     دليل التحليل
   </a>

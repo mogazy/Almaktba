@@ -64,7 +64,26 @@
 العودة الى مكتبتي            </span>
         </a>
     </header>
+    <style>
+     /* التصميم الأساسي للـ header */
+#main-header {
+  transition: all 0.2s ease; /* لعملية انتقال سلسة */
+  height: 75px; /* الارتفاع الأولي */
+  
+    box-shadow: 1px 1px 1px #000000;
+border-bottom-left-radius: 9px;
+  border-bottom-right-radius: 9px;
 
+}
+
+/* التصميم بعد إضافة كلاس 'scrolled' بواسطة JavaScript */
+#main-header.scrolled {
+  height: 50px; /* الارتفاع الجديد بعد التمرير */
+  box-shadow: 2px 3px 10px #000000;
+border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+} 
+    </style>
     <!-- Main Content -->
     <main class="flex-grow p-4 md:p-6">
         <div class="max-w-3xl mx-auto p-4 md:p-8 rounded-xl container-bg">

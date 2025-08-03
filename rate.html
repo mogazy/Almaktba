@@ -64,7 +64,19 @@
 العودة الى مكتبتي            </span>
         </a>
     </header>
+    
     <style>
+        header {
+  position: fixed;
+  top: 0;           /* يثبت الـ header في أعلى الصفحة */
+  left: 0;          /* يثبته على الجانب الأيسر */
+  width: 100%;      /* يجعله يمتد على عرض الشاشة بالكامل */
+  z-index: 1000;    /* يضمن بقاء الـ header فوق باقي محتوى الصفحة */
+  /* خصائص التصميم الأخرى مثل اللون والخلفية */
+  background-color: #fff;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
      /* التصميم الأساسي للـ header */
 #main-header {
   transition: all 0.2s ease; /* لعملية انتقال سلسة */

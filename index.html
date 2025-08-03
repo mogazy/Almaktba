@@ -20,13 +20,13 @@ header {
   top: 0;
   width: 100%;
   z-index: 9999; /* يمكنك تعديل هذه القيمة لضمان ظهور الهيدر فوق العناصر الأخرى */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 3px 10px #000000;
 border-bottom-left-radius: 15px;
   border-bottom-right-radius: 15px;
 }
 
 body {
-  padding-top: 60px; /* أو أي قيمة تساوي ارتفاع الهيدر، لتجنب تغطية المحتوى */
+  padding-top: 70px; /* أو أي قيمة تساوي ارتفاع الهيدر، لتجنب تغطية المحتوى */
 }
 
         /* الخط الرئيسي */
@@ -169,6 +169,8 @@ body {
         .header {
             background: linear-gradient(135deg, #4A00B2 0%, #8B008B 100%); /* تدرج من أرجواني داكن إلى بنفسجي غامق */
             color: white; /* لون النص ليتناسب مع الخلفية الداكنة */
+        
+          
         }
 
         /* تعديلات على عنصر المحاضرة لجذبها أكثر */
@@ -489,13 +491,11 @@ body {
 </head>
 <body class="font-inter min-h-screen overflow-x:hidden">
     
-  <header class="header flex justify-between items-center p-5 overflow-hidden">
+  <header class="header flex justify-between items-center p-5 overflow-hidden" style=" display: flex;
+  justify-content: center;
+  align-items: center;">
             <!-- الشعار في أقصى اليمين -->
-            <div class="logo-container relative z-10"> 
-                <div class="logo">
-                    <span class="logo-text">مكتبتي</span>
-                </div>
-            </div>
+
             
             <!-- زر البحث تمت إزالته سابقاً -->
             
@@ -505,8 +505,10 @@ body {
                     <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
                 </svg>
             </div>
-            <div class="flex gap-3 items-center">
-  <a href="https://mogazy.github.io/Almaktba/rate.html" class="rate-us-btn">قيم البوت</a>
+            <div class="flex gap-3 items-center" >
+  <a href="https://mogazy.github.io/Almaktba/rate.html" class="rate-us-btn"
+  style="text-shadow: 2px 1px 1px #000000; 
+  box-shadow: 0 0 20px 5px rgba(255, 255, 0, 0.7);">قيم بوت مكتبتي</a>
 </div>
 <style>
 

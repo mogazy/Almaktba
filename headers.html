@@ -1,5 +1,5 @@
 /*هيدر الصفحات العادية */
-<header class="p-4 bg-purple-900 text-white rounded-b-xl shadow-md"  >
+    <header class="p-4 bg-purple-900 text-white rounded-b-xl shadow-md" id="main-header" >
         <a href="https://mogazy.github.io/Almaktba/" class="flex justify-between items-center w-full h-full"
             style="  display: flex;
   justify-content: center; /* توسيط أفقي */
@@ -8,7 +8,19 @@
 العودة الى مكتبتي            </span>
         </a>
     </header>
+    
     <style>
+        header {
+  position: fixed;
+  top: 0;           /* يثبت الـ header في أعلى الصفحة */
+  left: 0;          /* يثبته على الجانب الأيسر */
+  width: 100%;      /* يجعله يمتد على عرض الشاشة بالكامل */
+  z-index: 1000;    /* يضمن بقاء الـ header فوق باقي محتوى الصفحة */
+  /* خصائص التصميم الأخرى مثل اللون والخلفية */
+  background-color: #fff;
+  padding: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
      /* التصميم الأساسي للـ header */
 #main-header {
   transition: all 0.2s ease; /* لعملية انتقال سلسة */
@@ -27,6 +39,9 @@ border-bottom-left-radius: 9px;
 border-bottom-left-radius: 15px;
   border-bottom-right-radius: 15px;
 } 
+        body {
+  padding-top: 70px; /* أو أي قيمة تساوي ارتفاع الهيدر، لتجنب تغطية المحتوى */
+}
     </style>
     <script>
         window.addEventListener('scroll', function() {

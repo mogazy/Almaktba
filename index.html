@@ -18,7 +18,7 @@
 header {
   position: fixed;
   top: 0;
-  width: 100%;
+  width: 99%;
   z-index: 9999; /* يمكنك تعديل هذه القيمة لضمان ظهور الهيدر فوق العناصر الأخرى */
   box-shadow: 2px 3px 10px #000000;
 border-bottom-left-radius: 15px;
@@ -491,9 +491,43 @@ body {
 </head>
 <body class="font-inter min-h-screen overflow-x:hidden">
     
-  <header class="header flex justify-between items-center p-5 overflow-hidden" style=" display: flex;
+  <header id="main-header" class="header flex justify-between items-center p-5 overflow-hidden" style=" display: flex;
   justify-content: center;
   align-items: center;">
+    
+    <style>
+     /* التصميم الأساسي للـ header */
+#main-header {
+  transition: all 0.2s ease; /* لعملية انتقال سلسة */
+  height: 75px; /* الارتفاع الأولي */
+  
+    box-shadow: 1px 1px 1px #000000;
+border-bottom-left-radius: 9px;
+  border-bottom-right-radius: 9px;
+
+}
+
+/* التصميم بعد إضافة كلاس 'scrolled' بواسطة JavaScript */
+#main-header.scrolled {
+  height: 50px; /* الارتفاع الجديد بعد التمرير */
+  box-shadow: 2px 3px 10px #000000;
+border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+} 
+    </style>
+    
+<script>
+  
+  window.addEventListener('scroll', function() {
+  const header = document.getElementById('main-header');
+  if (window.scrollY > 50) {
+    header.classList.add('scrolled');
+  } else {
+    header.classList.remove('scrolled');
+  }
+});
+  
+</script>
             <!-- الشعار في أقصى اليمين -->
 
             
@@ -504,7 +538,7 @@ body {
             <div class="flex gap-3 items-center" >
   <a href="https://mogazy.github.io/Almaktba/rate.html" class="rate-us-btn"
   style="text-shadow: 2px 1px 1px #000000; 
-  box-shadow: 0 0 20px 5px rgba(255, 255, 0, 0.7);">قيم بوت مكتبتي</a>
+  box-shadow: 0 0 20px 5px rgba(255, 255, 0, 0.7); font-size:15px; ">قيم بوت مكتبتي</a>
 </div>
 <style>
 

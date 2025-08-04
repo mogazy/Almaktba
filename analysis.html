@@ -7,11 +7,6 @@
     <!-- تضمين Tailwind CSS من CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: 'Cairo', sans-serif; /* استخدام خط مميز */
-            background-color: #f3f4f6; /* لون رمادي فاتح */
-            padding-top: 5rem; /* لإفساح المجال للـ header الثابت */
-        }
         /* تضمين الخط من جوجل */
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
 
@@ -33,19 +28,25 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #6d07ba;
         }
+        
+        /* نمط مخصص لظل الـ header أكثر حدة */
+        .header-intense-shadow {
+            box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
-    <!-- Header ثابت في الأعلى مع تدرج لوني وبظل أكبر -->
-    <header class="fixed top-0 right-0 left-0 z-50 bg-gradient-to-l from-[#d000fa] to-[#6d07ba] text-white p-4 text-center rounded-b-lg shadow-xl">
-        <a href="https://mogazy.github.io/Almaktba/" class="text-white text-lg font-bold">
-            العودة إلى مكتبتي
-        </a>
+<body class="flex flex-col min-h-screen bg-gray-200">
+    <!-- Header ثابت في الأعلى مع تدرج لوني وبظل أكبر، وانحناء أكبر، وتم حصر محتواه -->
+    <header class="fixed top-0 right-0 left-0 z-50 bg-gradient-to-l from-[#d000fa] to-[#6d07ba] text-white p-4 text-center rounded-b-2xl header-intense-shadow">
+        <div class="max-w-2xl mx-auto w-full">
+            <a href="https://mogazy.github.io/Almaktba/" class="text-white text-lg font-bold">
+                العودة إلى مكتبتي
+            </a>
+        </div>
     </header>
 
-    <!-- حاوية المحتوى الرئيسية -->
-    <!-- تم تقليل المسافة بين العناصر إلى space-y-4 -->
-    <div class="max-w-2xl mx-auto w-full p-4 flex-grow space-y-4">
+    <!-- حاوية المحتوى الرئيسية مع مسافة علوية لتجنب تداخل المحتوى مع الـ header الثابت -->
+    <div class="max-w-2xl mx-auto w-full p-4 flex-grow space-y-4 pt-[6rem]">
 
         <!-- مربع البحث -->
         <div class="relative bg-white rounded-lg p-2 shadow-md">

@@ -7,8 +7,12 @@
     <!-- تضمين Tailwind CSS من CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* تضمين الخط من جوجل */
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        /* تضمين الخطوط من جوجل */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Playfair+Display+SC:wght@700&display=swap');
+
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
 
         /* لنمط شريط التمرير */
         ::-webkit-scrollbar {
@@ -33,13 +37,18 @@
         .header-intense-shadow {
             box-shadow: 0 15px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
         }
+        
+        /* لتطبيق الخط الإنجليزي الجديد */
+        .english-font {
+            font-family: 'Playfair Display SC', serif;
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen bg-gray-200">
-    <!-- Header ثابت في الأعلى مع تدرج لوني وبظل أكبر، وانحناء أكبر، وتم حصر محتواه -->
-    <header class="fixed top-0 right-0 left-0 z-50 bg-gradient-to-l from-[#d000fa] to-[#6d07ba] text-white p-4 text-center rounded-b-2xl header-intense-shadow">
+    <!-- Header ثابت في الأعلى مع تدرج لوني وبظل أكثر حدة، أصبح أكبر قليلاً -->
+    <header class="fixed top-0 right-0 left-0 z-50 bg-gradient-to-l from-[#d000fa] to-[#6d07ba] text-white p-6 text-center rounded-b-3xl header-intense-shadow">
         <div class="max-w-2xl mx-auto w-full">
-            <a href="https://mogazy.github.io/Almaktba/" class="text-white text-lg font-bold">
+            <a href="https://mogazy.github.io/Almaktba/" class="text-white text-xl font-bold">
                 العودة إلى مكتبتي
             </a>
         </div>
@@ -197,6 +206,19 @@
         }
 
         /**
+         * دالة لتنسيق اسم التحليل
+         * تقوم بلف الكلمات الإنجليزية بعلامة <span> مع فئة مخصصة.
+         */
+        function formatAnalysisName(name) {
+            if (!name) return '';
+            // التعبير النمطي للبحث عن الكلمات الإنجليزية
+            const englishWordRegex = /[a-zA-Z\s]+/g;
+            return name.replace(englishWordRegex, (match) => {
+                return `<span class="english-font font-bold">${match}</span>`;
+            });
+        }
+
+        /**
          * دالة لعرض البيانات المجلوبة في واجهة المستخدم
          * @param {Array} analyses - مصفوفة من كائنات التحليل
          */
@@ -220,25 +242,29 @@
                 // جعل بطاقة التحليل بالكامل رابطًا
                 const itemLink = document.createElement('a');
                 itemLink.href = analysis.link;
-                itemLink.target = "_blank"; // فتح الرابط في علامة تبويب جديدة
+                // تم حذف السمة target="_blank" لفتح الرابط في نفس النافذة
+                
                 // استخدام متغير فئة لون الخلفية
                 itemLink.className = `block ${bgColorClass} p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-300 transform hover:scale-[1.01]`;
 
                 const contentDiv = document.createElement('div');
                 contentDiv.className = "flex items-center justify-between";
 
-                // اسم التحليل
-                const analysisNameP = document.createElement('p');
-                analysisNameP.className = "text-xl font-bold text-gray-800";
-                analysisNameP.textContent = analysis.analysisName;
-
-                // التصنيف كـ "مستطيل" صغير
+                // التصنيف كـ "مستطيل" صغير (على اليمين)
                 const categorySpan = document.createElement('span');
                 categorySpan.className = "inline-block px-3 py-1 rounded-full text-xs font-bold text-white bg-[#6d07ba]";
                 categorySpan.textContent = analysis.category;
 
-                contentDiv.appendChild(analysisNameP);
-                contentDiv.appendChild(categorySpan);
+                // اسم التحليل (على اليسار)
+                const analysisNameP = document.createElement('p');
+                // تم إضافة 'text-left' لضمان محاذاة النص لليسار
+                analysisNameP.className = "text-xl font-bold text-gray-800 text-left";
+                // استخدام الدالة الجديدة لتنسيق الاسم
+                analysisNameP.innerHTML = formatAnalysisName(analysis.analysisName);
+                
+
+                contentDiv.appendChild(categorySpan); // إضافة التصنيف أولاً ليكون على اليمين في RTL
+                contentDiv.appendChild(analysisNameP); // إضافة الاسم ثانياً ليكون على اليسار في RTL
 
                 itemLink.appendChild(contentDiv);
                 analysisListEl.appendChild(itemLink);

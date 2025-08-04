@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قائمة التحليلات</title>
+    <!-- تضمين Tailwind CSS من CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif; /* استخدام خط مميز */
+            background-color: #f3f4f6; /* لون رمادي فاتح */
+            padding-top: 5rem; /* لإفساح المجال للـ header الثابت */
+        }
+        /* تضمين الخط من جوجل */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+
+        /* لنمط شريط التمرير */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #9d17aa;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6d07ba;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+    <!-- Header ثابت في الأعلى مع تدرج لوني وبظل أكبر -->
+    <header class="fixed top-0 right-0 left-0 z-50 bg-gradient-to-l from-[#d000fa] to-[#6d07ba] text-white p-4 text-center rounded-b-lg shadow-xl">
+        <a href="https://mogazy.github.io/Almaktba/" class="text-white text-lg font-bold">
+            العودة إلى مكتبتي
+        </a>
+    </header>
+
+    <!-- حاوية المحتوى الرئيسية -->
+    <!-- تم تقليل المسافة بين العناصر إلى space-y-4 -->
+    <div class="max-w-2xl mx-auto w-full p-4 flex-grow space-y-4">
+
+        <!-- مربع البحث -->
+        <div class="relative bg-white rounded-lg p-2 shadow-md">
+            <input type="text" id="search-input" placeholder="ابحث عن تحليل..." class="w-full focus:outline-none bg-transparent pr-8 text-gray-700 placeholder-gray-400">
+            <button id="clear-search" class="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200 hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586l-1.293-1.293z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- حاوية بيضاء تحتوي على قائمة التحليلات، تمتد على كامل العرض وحتى أسفل الشاشة -->
+        <div class="bg-white p-4 shadow-md border border-gray-200 flex-grow w-full rounded-lg">
+            
+            <!-- عنصر لعرض حالة التحميل أو الخطأ -->
+            <div id="status-message" class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg shadow-md transition-all duration-300">
+                <p>جارٍ تحميل البيانات...</p>
+            </div>
+            
+            <!-- تم تقليل المسافة بين عناصر القائمة إلى space-y-2 -->
+            <div id="analysis-list" class="space-y-2">
+                <!-- سيتم إضافة عناصر القائمة هنا بواسطة JavaScript -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- تضمين مكتبات Firebase من CDN -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // إعدادات Firebase التي تم توفيرها من قبل المستخدم
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWxQCNU-91cK2FwiL3zs1_bKO6LtJHTz4",
+            authDomain: "rate-f04e2.firebaseapp.com",
+            projectId: "rate-f04e2",
+            storageBucket: "rate-f04e2.firebasestorage.app",
+            messagingSenderId: "236207388801",
+            appId: "1:236207388801:web:f46bdea16a3f25d6e8f580",
+            measurementId: "G-BGZWC1QQXK"
+        };
+        
+        // متغيرات عامة سيتم توفيرها من بيئة Canvas
+        // إذا لم تكن موجودة، سيتم استخدام الإعدادات المحلية
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfigFromEnv = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // تهيئة Firebase
+        let app;
+        let auth;
+        let db;
+        let allAnalyses = []; // لتخزين جميع التحليلات للبحث
+
+        // دالة لتهيئة Firebase عند تحميل الصفحة
+        const initializeFirebase = async () => {
+            try {
+                app = initializeApp(firebaseConfigFromEnv);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        console.log("تم توثيق المستخدم بنجاح. UID:", user.uid);
+                        fetchAnalysisData();
+                    } else {
+                        console.log("المستخدم غير موثق، جارٍ تسجيل الدخول.");
+                        signInUser();
+                    }
+                });
+            } catch (error) {
+                console.error("خطأ في تهيئة Firebase:", error);
+                showStatusMessage(`خطأ في تهيئة Firebase: ${error.message}`, 'error');
+            }
+        };
+
+        const signInUser = async () => {
+            showStatusMessage('جارٍ تسجيل الدخول...');
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("خطأ في تسجيل الدخول:", error);
+                showStatusMessage(`خطأ في تسجيل الدخول: ${error.message}. يرجى التحقق من إعدادات التوثيق في Firebase.`, 'error');
+            }
+        };
+
+        const statusMessageEl = document.getElementById('status-message');
+        const analysisListEl = document.getElementById('analysis-list');
+        const searchInput = document.getElementById('search-input');
+        const clearSearchBtn = document.getElementById('clear-search');
+
+        /**
+         * دالة لعرض رسالة حالة معينة للمستخدم
+         */
+        function showStatusMessage(message, type = 'info') {
+            statusMessageEl.textContent = message;
+            statusMessageEl.className = 'p-4 rounded-lg shadow-md transition-all duration-300';
+            switch(type) {
+                case 'success':
+                    statusMessageEl.classList.add('bg-green-100', 'border-l-4', 'border-green-500', 'text-green-700');
+                    // لا تعرض رسالة النجاح، فقط قم بإخفاء رسالة التحميل
+                    statusMessageEl.style.display = 'none';
+                    break;
+                case 'error':
+                    statusMessageEl.classList.add('bg-red-100', 'border-l-4', 'border-red-500', 'text-red-700');
+                    statusMessageEl.style.display = 'block';
+                    break;
+                case 'info':
+                default:
+                    statusMessageEl.classList.add('bg-blue-100', 'border-l-4', 'border-blue-500', 'text-blue-700');
+                    statusMessageEl.style.display = 'block';
+                    break;
+            }
+        }
+
+        /**
+         * دالة لجلب البيانات من مجموعة 'analysis' في Firestore
+         */
+        async function fetchAnalysisData() {
+            showStatusMessage('جارٍ تحميل البيانات...');
+            analysisListEl.innerHTML = '';
+
+            try {
+                const analysisCollectionRef = collection(db, 'analysis');
+                const querySnapshot = await getDocs(analysisCollectionRef);
+
+                allAnalyses = [];
+                querySnapshot.forEach((doc) => {
+                    allAnalyses.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+
+                displayAnalysisData(allAnalyses);
+                // إزالة رسالة "تم تحميل البيانات بنجاح!"
+                showStatusMessage('', 'success');
+            } catch (error) {
+                console.error("خطأ في جلب البيانات:", error);
+                showStatusMessage(`حدث خطأ أثناء جلب البيانات: ${error.message}. يرجى التحقق من الاتصال وقواعد Firestore.`, 'error');
+            }
+        }
+
+        /**
+         * دالة لعرض البيانات المجلوبة في واجهة المستخدم
+         * @param {Array} analyses - مصفوفة من كائنات التحليل
+         */
+        function displayAnalysisData(analyses) {
+            analysisListEl.innerHTML = '';
+
+            if (analyses.length === 0) {
+                analysisListEl.innerHTML = `
+                    <div class="bg-gray-100 p-6 rounded-lg text-center text-gray-600 shadow-md">
+                        <p class="mb-2">إما أن يكون الإدخال خاطئًا أو أن التحليل غير موجود.</p>
+                        <p>أعلمنا في <a href="https://mogazy.github.io/Almaktba/rate.html" class="text-blue-600 hover:underline font-bold">قسم التعليقات</a> إذا أردت إضافة التحليل.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            analyses.forEach((analysis, index) => {
+                // تحديد لون الخلفية بناءً على ما إذا كان العنصر فرديًا أم زوجيًا
+                const bgColorClass = index % 2 === 0 ? 'bg-white' : 'bg-gray-100';
+
+                // جعل بطاقة التحليل بالكامل رابطًا
+                const itemLink = document.createElement('a');
+                itemLink.href = analysis.link;
+                itemLink.target = "_blank"; // فتح الرابط في علامة تبويب جديدة
+                // استخدام متغير فئة لون الخلفية
+                itemLink.className = `block ${bgColorClass} p-6 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow duration-300 transform hover:scale-[1.01]`;
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = "flex items-center justify-between";
+
+                // اسم التحليل
+                const analysisNameP = document.createElement('p');
+                analysisNameP.className = "text-xl font-bold text-gray-800";
+                analysisNameP.textContent = analysis.analysisName;
+
+                // التصنيف كـ "مستطيل" صغير
+                const categorySpan = document.createElement('span');
+                categorySpan.className = "inline-block px-3 py-1 rounded-full text-xs font-bold text-white bg-[#6d07ba]";
+                categorySpan.textContent = analysis.category;
+
+                contentDiv.appendChild(analysisNameP);
+                contentDiv.appendChild(categorySpan);
+
+                itemLink.appendChild(contentDiv);
+                analysisListEl.appendChild(itemLink);
+            });
+        }
+
+        /**
+         * دالة لتصفية التحليلات بناءً على مدخلات البحث
+         */
+        function filterAnalyses() {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            if (searchTerm === '') {
+                displayAnalysisData(allAnalyses);
+                clearSearchBtn.classList.add('hidden');
+                return;
+            }
+
+            clearSearchBtn.classList.remove('hidden');
+
+            const filtered = allAnalyses.filter(analysis => {
+                const name = analysis.analysisName?.toLowerCase() || '';
+                const category = analysis.category?.toLowerCase() || '';
+                const otherNames = analysis.otherNames?.toLowerCase() || '';
+                
+                return name.includes(searchTerm) || category.includes(searchTerm) || otherNames.includes(searchTerm);
+            });
+
+            displayAnalysisData(filtered);
+        }
+        
+        // إضافة مستمع للأحداث على حقل البحث
+        searchInput.addEventListener('input', filterAnalyses);
+
+        // إضافة مستمع للأحداث على زر مسح البحث
+        clearSearchBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            filterAnalyses();
+            searchInput.focus();
+        });
+
+
+        // ابدأ بتهيئة Firebase عند تحميل الصفحة
+        initializeFirebase();
+    </script>
+</body>
+</html>

@@ -1,472 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المستكشف التفاعلي لتحليل الدم</title>
-    <!-- Chosen Palette: Calm Neutrals -->
-    <!-- Application Structure Plan: A two-tab interactive dashboard. The first tab focuses on White Blood Cells (WBCs), featuring a donut chart for relative abundance and interactive buttons to display details for each of the 5 cell types. The second tab covers Red Blood Cell (RBC) indices, using interactive buttons to explain each index (MCV, MCH, etc.) and a dynamic visual aid to show cell size/color changes. This structure separates the two main report components for clarity, uses interaction to engage the user, and replaces a long scroll with focused, on-demand information, which is superior for learning and usability. -->
-    <!-- Visualization & Content Choices: Report Info (WBC types) -> Goal (Compare roles) -> Viz (Chart.js Donut for abundance, HTML/JS for interactive detail cards) -> Interaction (Click button to update details) -> Justification (Visual context + focused learning). Report Info (RBC indices) -> Goal (Explain significance) -> Viz (HTML/CSS visual aid for size/color, HTML/JS for detail cards) -> Interaction (Click button to update explanation and visual) -> Justification (Makes abstract concepts tangible). This design avoids passive reading and promotes active exploration. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #F8FAFC;
-        }
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 350px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 350px;
-            max-height: 400px;
-        }
-        .tab-btn {
-            transition: all 0.3s ease;
-        }
-        .tab-btn.active {
-            background-color: #0F766E;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
-        .content-card {
-            transition: opacity 0.4s ease-in-out, transform 0.4s ease-in-out;
-            opacity: 0;
-            transform: translateY(10px);
-            display: none;
-        }
-        .content-card.active {
-            opacity: 1;
-            transform: translateY(0);
-            display: block;
-        }
-        .visual-aid-cell {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            border: 4px solid;
-            transition: all 0.3s ease;
-        }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-700">
-
-    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
-        <header class="text-center mb-8 md:mb-12">
-            <h1 class="text-3xl md:text-4xl font-bold text-teal-800">المستكشف التفاعلي لتحليل الدم</h1>
-            <p class="mt-2 text-lg text-slate-600">أداة مبسطة لفهم مكونات الدم ودلالاتها الصحية</p>
-        </header>
-
-        <main>
-            <!-- Main Navigation Tabs -->
-            <div class="flex justify-center border-b-2 border-slate-200 mb-8">
-                <button id="nav-wbc" class="main-nav-btn text-lg md:text-xl font-semibold py-3 px-6 border-b-4 border-teal-600 text-teal-700">خلايا الدم البيضاء</button>
-                <button id="nav-rbc" class="main-nav-btn text-lg md:text-xl font-semibold py-3 px-6 border-b-4 border-transparent text-slate-500">مؤشرات الدم الحمراء</button>
-            </div>
-
-            <!-- WBC Section -->
-            <section id="wbc-section">
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-teal-700">جيش المناعة: خلايا الدم البيضاء (WBCs)</h2>
-                    <p class="mt-2 max-w-3xl mx-auto text-slate-600">خلايا الدم البيضاء هي خط الدفاع الأول في الجسم ضد العدوى والأمراض. يوفر تحليل أعدادها وأنواعها المختلفة نافذة قوية لفهم استجابة جهازك المناعي، ويساعد في التمييز بين أنواع العدوى المختلفة كالبكتيرية والفيروسية.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
-                    <div class="md:col-span-1">
-                        <h3 class="text-xl font-semibold text-center mb-4 text-slate-700">التوزيع النسبي للخلايا</h3>
-                        <div class="chart-container">
-                            <canvas id="wbcChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="md:col-span-2">
-                        <div class="bg-white p-6 rounded-xl shadow-md">
-                            <div class="flex flex-wrap justify-center gap-2 mb-6">
-                                <button data-target="neutrophils" class="wbc-tab-btn tab-btn active py-2 px-4 bg-slate-100 rounded-full font-semibold text-slate-600">العدلات</button>
-                                <button data-target="lymphocytes" class="wbc-tab-btn tab-btn py-2 px-4 bg-slate-100 rounded-full font-semibold text-slate-600">اللمفاويات</button>
-                                <button data-target="monocytes" class="wbc-tab-btn tab-btn py-2 px-4 bg-slate-100 rounded-full font-semibold text-slate-600">الوحيدات</button>
-                                <button data-target="eosinophils" class="wbc-tab-btn tab-btn py-2 px-4 bg-slate-100 rounded-full font-semibold text-slate-600">الحمضات</button>
-                                <button data-target="basophils" class="wbc-tab-btn tab-btn py-2 px-4 bg-slate-100 rounded-full font-semibold text-slate-600">القاعدية</button>
-                            </div>
-                            <div id="wbc-content-area">
-                                <!-- Dynamic Content Here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- RBC Section -->
-            <section id="rbc-section" class="hidden">
-                 <div class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-teal-700">ناقلات الأكسجين: مؤشرات الدم الحمراء (RBCs)</h2>
-                    <p class="mt-2 max-w-3xl mx-auto text-slate-600">تقيس هذه المؤشرات حجم خلايا الدم الحمراء ومحتواها من الهيموجلوبين، وهي حيوية لتشخيص وتصنيف أنواع فقر الدم المختلفة، من نقص الحديد إلى نقص الفيتامينات، مما يوجه نحو العلاج الصحيح.</p>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-md">
-                    <div class="flex flex-wrap justify-center gap-2 mb-6">
-                        <button data-target="mcv" class="rbc-tab-btn tab-btn active py-2 px-4 bg-slate-100 rounded-full font-semibold text-slate-600">MCV</button>
-                        <button data-target="mch" class="rbc-tab-btn tab-btn py-2 px-4 bg-slate-100 rounded-full font-semibold text-slate-600">MCH</button>
-                        <button data-target="mchc" class="rbc-tab-btn tab-btn py-2 px-4 bg-slate-100 rounded-full font-semibold text-slate-600">MCHC</button>
-                        <button data-target="pcv" class="rbc-tab-btn tab-btn py-2 px-4 bg-slate-100 rounded-full font-semibold text-slate-600">PCV</button>
-                    </div>
-                     <div id="rbc-content-area">
-                        <!-- Dynamic Content Here -->
-                    </div>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <script>
-        const wbcData = {
-            neutrophils: {
-                title: 'العدلات (Neutrophils)',
-                icon: '🛡️',
-                description: 'هي خط الدفاع الأول والجنود الأكثر عددًا في مواجهة العدوى البكتيرية والفطريات. تهاجم وتبتلع مسببات الأمراض مباشرة.',
-                high: {
-                    label: 'الارتفاع (Neutrophilia)',
-                    meaning: 'مؤشر قوي على وجود عدوى بكتيرية حادة أو التهاب شديد في الجسم.'
-                },
-                low: {
-                    label: 'الانخفاض (Neutropenia)',
-                    meaning: 'قد يشير إلى عدوى فيروسية قوية، أو بعض أمراض المناعة الذاتية، أو مشاكل في نخاع العظم.'
-                }
-            },
-            lymphocytes: {
-                title: 'الخلايا اللمفاوية (Lymphocytes)',
-                icon: '🎯',
-                description: 'هي القوات الخاصة في الجهاز المناعي، متخصصة في محاربة الفيروسات والخلايا السرطانية وتكوين ذاكرة مناعية طويلة الأمد.',
-                high: {
-                    label: 'الارتفاع (Lymphocytosis)',
-                    meaning: 'يعتبر المؤشر الرئيسي لوجود عدوى فيروسية (مثل الإنفلونزا أو كوفيد-19).'
-                },
-                low: {
-                    label: 'الانخفاض (Lymphopenia)',
-                    meaning: 'قد يحدث أثناء العدوى الحادة (بما في ذلك الفيروسية) أو بسبب أمراض مناعية.'
-                }
-            },
-            monocytes: {
-                title: 'الخلايا الوحيدة (Monocytes)',
-                icon: '🧹',
-                description: 'تعمل كـ "عمال النظافة" في الجسم، حيث تبتلع الخلايا الميتة والحطام ومسببات الأمراض. تلعب دورًا هامًا في العدوى المزمنة.',
-                high: {
-                    label: 'الارتفاع (Monocytosis)',
-                    meaning: 'يرتبط غالبًا بالعدوى المزمنة (مثل السل)، أمراض المناعة الذاتية، وبعض أنواع السرطان.'
-                },
-                low: {
-                    label: 'الانخفاض (Monocytopenia)',
-                    meaning: 'أقل شيوعًا، وقد يرتبط بمشاكل في نخاع العظم أو أنواع معينة من اللوكيميا.'
-                }
-            },
-            eosinophils: {
-                title: 'الحمضات (Eosinophils)',
-                icon: '🐛',
-                description: 'متخصصة في محاربة العدوى الطفيلية (مثل الديدان) وتلعب دورًا رئيسيًا في الاستجابات التحسسية مثل الربو والأكزيما.',
-                high: {
-                    label: 'الارتفاع (Eosinophilia)',
-                    meaning: 'مؤشر كلاسيكي على وجود حساسية نشطة أو عدوى طفيلية.'
-                },
-                low: {
-                    label: 'الانخفاض',
-                    meaning: 'عادة لا يعتبر ذا أهمية سريرية كبيرة.'
-                }
-            },
-            basophils: {
-                title: 'الخلايا القاعدية (Basophils)',
-                icon: '🚨',
-                description: 'الأقل عددًا ولكنها قوية، تطلق الهيستامين ومواد أخرى أثناء التفاعلات التحسسية والالتهابات الحادة.',
-                high: {
-                    label: 'الارتفاع (Basophilia)',
-                    meaning: 'نادر، ولكن قد يرتبط بردود فعل تحسسية مزمنة، التهابات، أو بعض أنواع ابيضاض الدم.'
-                },
-                low: {
-                    label: 'الانخفاض',
-                    meaning: 'من الصعب قياسه ولا يحمل عادةً دلالة مرضية.'
-                }
-            }
-        };
-
-        const rbcData = {
-            mcv: {
-                title: 'متوسط حجم الكرية (MCV)',
-                description: 'يقيس متوسط حجم خلايا الدم الحمراء. يساعد في تحديد ما إذا كانت الخلايا صغيرة، طبيعية، أم كبيرة.',
-                high: {
-                    label: 'ارتفاع (خلايا كبيرة - Macrocytic)',
-                    meaning: 'نقص فيتامين B12 أو حمض الفوليك، أمراض الكبد، قصور الغدة الدرقية.',
-                    visual: { size: '100px', color: '#EF4444', label: 'كبيرة' }
-                },
-                low: {
-                    label: 'انخفاض (خلايا صغيرة - Microcytic)',
-                    meaning: 'فقر الدم الناتج عن نقص الحديد (السبب الأكثر شيوعًا)، الثلاسيميا.',
-                    visual: { size: '60px', color: '#F87171', label: 'صغيرة' }
-                },
-                normalVisual: { size: '80px', color: '#F43F5E', label: 'طبيعية' }
-            },
-            mch: {
-                title: 'متوسط هيموجلوبين الكرية (MCH)',
-                description: 'يقيس متوسط كمية الهيموجلوبين (البروتين الحامل للأكسجين) في كل خلية دم حمراء.',
-                high: {
-                    label: 'ارتفاع',
-                    meaning: 'غالبًا ما يترافق مع ارتفاع MCV (الخلايا الكبيرة)، حيث تحتوي الخلية الأكبر على هيموجلوبين أكثر.',
-                    visual: { color: '#F43F5E', label: 'صبغة عالية' }
-                },
-                low: {
-                    label: 'انخفاض (خلايا باهتة - Hypochromic)',
-                    meaning: 'مؤشر رئيسي على فقر الدم بنقص الحديد، حيث لا يوجد حديد كافٍ لصنع الهيموجلوبين.',
-                    visual: { color: '#FCA5A5', label: 'باهتة' }
-                },
-                normalVisual: { color: '#EF4444', label: 'طبيعية' }
-            },
-            mchc: {
-                title: 'تركيز هيموجلوبين الكرية (MCHC)',
-                description: 'يقيس تركيز الهيموجلوبين داخل الخلية، أي مدى "كثافة" الهيموجلوبين بغض النظر عن حجم الخلية.',
-                 high: {
-                    label: 'ارتفاع',
-                    meaning: 'نادر، قد يشير إلى تكوّن الكريات الكروي الوراثي أو الجفاف الشديد.',
-                    visual: { color: '#DC2626', label: 'مُركزة' }
-                },
-                low: {
-                    label: 'انخفاض (Hypochromia)',
-                    meaning: 'يؤكد وجود خلايا باهتة اللون، ويرتبط بقوة بنقص الحديد والثلاسيميا.',
-                    visual: { color: '#FCA5A5', label: 'باهتة' }
-                },
-                normalVisual: { color: '#EF4444', label: 'طبيعية' }
-            },
-            pcv: {
-                title: 'حجم الكريات المضغوط (PCV/HCT)',
-                description: 'يقيس النسبة المئوية لخلايا الدم الحمراء من إجمالي حجم الدم. يعطي فكرة عامة عن كثافة الدم.',
-                high: {
-                    label: 'ارتفاع (كثرة الحمر - Polycythemia)',
-                    meaning: 'الجفاف (السبب الأكثر شيوعًا)، أمراض الرئة أو القلب المزمنة، الإقامة في المرتفعات.',
-                    visual: { fill: '70%', label: 'دم كثيف' }
-                },
-                low: {
-                    label: 'انخفاض (فقر الدم - Anemia)',
-                    meaning: 'أي نوع من أنواع فقر الدم، فقدان الدم، نقص التغذية، أمراض الكلى.',
-                    visual: { fill: '30%', label: 'دم خفيف' }
-                },
-                normalVisual: { fill: '45%', label: 'طبيعي' }
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const wbcContentArea = document.getElementById('wbc-content-area');
-            const rbcContentArea = document.getElementById('rbc-content-area');
-
-            function updateWBCContent(cellType) {
-                const data = wbcData[cellType];
-                wbcContentArea.innerHTML = `
-                    <div class="content-card active">
-                        <div class="text-center mb-4">
-                            <span class="text-4xl">${data.icon}</span>
-                            <h3 class="text-2xl font-bold text-teal-700 mt-2">${data.title}</h3>
-                        </div>
-                        <p class="text-center text-slate-600 mb-6">${data.description}</p>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-rose-50 p-4 rounded-lg border-l-4 border-rose-400">
-                                <h4 class="font-bold text-rose-800">
-                                    <span class="inline-block ml-2">▲</span>${data.high.label}
-                                </h4>
-                                <p class="text-slate-700 mt-1">${data.high.meaning}</p>
-                            </div>
-                            <div class="bg-sky-50 p-4 rounded-lg border-l-4 border-sky-400">
-                                <h4 class="font-bold text-sky-800">
-                                    <span class="inline-block ml-2">▼</span>${data.low.label}
-                                </h4>
-                                <p class="text-slate-700 mt-1">${data.low.meaning}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            function getRBCVisualAid(index) {
-                const data = rbcData[index];
-                if (index === 'pcv') {
-                    return `
-                        <div class="flex justify-around items-end gap-4 text-center h-40">
-                             <div>
-                                <div class="w-16 h-32 bg-red-100 rounded-md flex flex-col-reverse"><div class="bg-red-500 rounded-b-md" style="height: ${data.low.visual.fill};"></div></div>
-                                <p class="mt-2 font-semibold text-sm">${data.low.visual.label}</p>
-                            </div>
-                            <div>
-                                <div class="w-16 h-32 bg-red-100 rounded-md flex flex-col-reverse"><div class="bg-red-500 rounded-b-md" style="height: ${data.normalVisual.fill};"></div></div>
-                                <p class="mt-2 font-semibold text-sm">طبيعي</p>
-                            </div>
-                             <div>
-                                <div class="w-16 h-32 bg-red-100 rounded-md flex flex-col-reverse"><div class="bg-red-500 rounded-b-md" style="height: ${data.high.visual.fill};"></div></div>
-                                <p class="mt-2 font-semibold text-sm">${data.high.visual.label}</p>
-                            </div>
-                        </div>
-                    `;
-                } else if (index === 'mcv') {
-                     return `
-                        <div class="flex justify-around items-center gap-4 text-center">
-                            <div class="visual-aid-cell" style="width:${data.low.visual.size}; height:${data.low.visual.size}; background-color:${data.low.visual.color}; border-color:${data.low.visual.color}44;">
-                                ${data.low.visual.label}
-                            </div>
-                            <div class="visual-aid-cell" style="width:${data.normalVisual.size}; height:${data.normalVisual.size}; background-color:${data.normalVisual.color}; border-color:${data.normalVisual.color}44;">
-                                ${data.normalVisual.label}
-                            </div>
-                            <div class="visual-aid-cell" style="width:${data.high.visual.size}; height:${data.high.visual.size}; background-color:${data.high.visual.color}; border-color:${data.high.visual.color}44;">
-                                ${data.high.visual.label}
-                            </div>
-                        </div>
-                    `;
-                } else { // MCH and MCHC
-                    return `
-                        <div class="flex justify-around items-center gap-4 text-center">
-                            <div class="visual-aid-cell" style="background-color:${data.low.visual.color}; border-color:${data.low.visual.color}44;">
-                                ${data.low.visual.label}
-                            </div>
-                            <div class="visual-aid-cell" style="background-color:${data.normalVisual.color}; border-color:${data.normalVisual.color}44;">
-                                ${data.normalVisual.label}
-                            </div>
-                            <div class="visual-aid-cell" style="background-color:${data.high.visual.color}; border-color:${data.high.visual.color}44;">
-                                ${data.high.visual.label}
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-
-            function updateRBCContent(index) {
-                const data = rbcData[index];
-                rbcContentArea.innerHTML = `
-                     <div class="content-card active">
-                        <div class="text-center mb-4">
-                            <h3 class="text-2xl font-bold text-teal-700">${data.title}</h3>
-                        </div>
-                        <p class="text-center text-slate-600 mb-6">${data.description}</p>
-                        <div class="mb-8 p-4 bg-slate-50 rounded-lg">
-                           ${getRBCVisualAid(index)}
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="bg-rose-50 p-4 rounded-lg border-l-4 border-rose-400">
-                                <h4 class="font-bold text-rose-800">
-                                    <span class="inline-block ml-2">▲</span>${data.high.label}
-                                </h4>
-                                <p class="text-slate-700 mt-1">${data.high.meaning}</p>
-                            </div>
-                            <div class="bg-sky-50 p-4 rounded-lg border-l-4 border-sky-400">
-                                <h4 class="font-bold text-sky-800">
-                                    <span class="inline-block ml-2">▼</span>${data.low.label}
-                                </h4>
-                                <p class="text-slate-700 mt-1">${data.low.meaning}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            const wbcTabButtons = document.querySelectorAll('.wbc-tab-btn');
-            wbcTabButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    wbcTabButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    updateWBCContent(btn.dataset.target);
-                });
-            });
-
-            const rbcTabButtons = document.querySelectorAll('.rbc-tab-btn');
-            rbcTabButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    rbcTabButtons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    updateRBCContent(btn.dataset.target);
-                });
-            });
-
-            const mainNavWBC = document.getElementById('nav-wbc');
-            const mainNavRBC = document.getElementById('nav-rbc');
-            const wbcSection = document.getElementById('wbc-section');
-            const rbcSection = document.getElementById('rbc-section');
-
-            mainNavWBC.addEventListener('click', () => {
-                mainNavWBC.classList.add('border-teal-600', 'text-teal-700');
-                mainNavWBC.classList.remove('border-transparent', 'text-slate-500');
-                mainNavRBC.classList.add('border-transparent', 'text-slate-500');
-                mainNavRBC.classList.remove('border-teal-600', 'text-teal-700');
-                wbcSection.classList.remove('hidden');
-                rbcSection.classList.add('hidden');
-            });
-
-            mainNavRBC.addEventListener('click', () => {
-                mainNavRBC.classList.add('border-teal-600', 'text-teal-700');
-                mainNavRBC.classList.remove('border-transparent', 'text-slate-500');
-                mainNavWBC.classList.add('border-transparent', 'text-slate-500');
-                mainNavWBC.classList.remove('border-teal-600', 'text-teal-700');
-                rbcSection.classList.remove('hidden');
-                wbcSection.classList.add('hidden');
-            });
-            
-            updateWBCContent('neutrophils');
-            updateRBCContent('mcv');
-
-            const ctx = document.getElementById('wbcChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['العدلات', 'اللمفاويات', 'الوحيدات', 'الحمضات', 'القاعدية'],
-                    datasets: [{
-                        label: 'التوزيع النسبي',
-                        data: [62, 30, 5.3, 2.3, 0.4],
-                        backgroundColor: [
-                            '#14B8A6',
-                            '#F43F5E',
-                            '#F59E0B',
-                            '#3B82F6',
-                            '#6366F1'
-                        ],
-                        borderColor: '#F8FAFC',
-                        borderWidth: 4,
-                        hoverOffset: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                             labels: {
-                                color: '#475569',
-                                font: {
-                                    family: "'Cairo', sans-serif",
-                                    size: 14
-                                }
-                            }
-                        },
-                        tooltip: {
-                             bodyFont: {
-                                family: "'Cairo', sans-serif"
-                            },
-                            titleFont: {
-                                family: "'Cairo', sans-serif"
-                            },
-                            callbacks: {
-                                label: function(context) {
-                                    return `${context.label}: ${context.raw}%`;
-                                }
-                            }
-                        }
-                    },
-                    cutout: '60%'
-                }
-            });
-        });
-    </script>
-</body>
-</html>
